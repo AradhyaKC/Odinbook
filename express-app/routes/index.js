@@ -6,4 +6,11 @@ router.get('/', async function(req, res, next) {
   res.render('index', { title:"Express"});
 });
 
-module.exports = router;
+router.post('/', async function(req,res,next){
+  // var reqData = req;
+  // if(reqData==undefined) return res.status(500).json('failed');
+  console.log(req.body);
+  res.json({data:9});
+});
+
+module.exports = router; 
