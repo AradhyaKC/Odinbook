@@ -1,5 +1,8 @@
 import './App.css';
 import {useState} from 'react';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import SignInForm from './Components/SignInComponent/SignInForm.js';
+
 
 var apiDir = 'http://localhost:3000/';
 
@@ -23,16 +26,15 @@ function App() {
     await setState('form working');
   }
 
+  const TempIndexComponent=()=>{ return <div>you are now viewing the esteemed index page </div>}
   return (
     <div className="center">
-      <div> state value = {state.toString()}</div>
-      <form className='center' style={{height:'min-content'}}>
-        <label htmlFor='email'> enter email</label>
-        <input id='email' name='email' placeholder='enter email here'/>
-        <label htmlFor='password'> enter password</label>
-        <input id='password' name='password'/>
-        <button onClick={onSubmit}> Submit </button>
-      </form>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={ <TempIndexComponent/>}/>
+          <Route path='/signIn' element={<SignInForm/>}/>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
