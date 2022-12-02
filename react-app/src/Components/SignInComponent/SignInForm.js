@@ -9,12 +9,9 @@ import {Button } from '@mui/material';
 
 function SignInForm(props){
 
-    const LogIn=async ()=>{
-        console.log('working');
-    }
-
-    
     const [signInIsOpen,setSignInIsOpen] = useState(false);
+    const [logInState,setLoginState] = useState({errors:[]});
+
     function SignInModal(props){
         const {open, handleClose} = props;
         const [errorState,setErrorState] = useState([]);
@@ -26,7 +23,7 @@ function SignInForm(props){
             for(const [key,value] of formData){
                 formObj[key]=value;
             }
-            var response = await fetch('http://localhost:3000/users',{
+            var response = await fetch(window.sessionStorage.getItem('apiDir')+'/users',{
                 method:'POST', headers:new Headers({'Content-Type':'application/json'}),
                 body:JSON.stringify(formObj),
             });
@@ -79,6 +76,28 @@ function SignInForm(props){
         setSignInIsOpen(false);
     }
 
+    const LogIn=async ()=>{
+        var formData = new FormData(document.getElementById('log-in-form'));
+        var formObj ={};
+        for(const [key,value] of formData){
+            formObj[key]=value;
+        }
+        var response = await fetch(window.sessionStorage.getItem('apiDir')+'/users/LogIn',{
+            method:'POST',headers:new Headers({'content-type':'application/json'}),
+            // body:JSON.stringify(`email=${formObj['email']}&password=${formObj['password']}`),
+            body:JSON.stringify({email:formObj['email'],password:formObj['password']}),
+        });
+        // response= await response.json();
+        response=await response.json();
+        console.log(response);
+        if(response.message!='success'){
+            setLoginState({errors:[...response.message]})
+        }else{
+            window.sessionStorage.setItem('user',JSON.stringify(response.user));
+            setLoginState({errors:[]});
+        }
+    }
+
     return (
         <div className='flex-container'>
             <SignInModal open={signInIsOpen} handleClose={onCloseModal}/>
@@ -86,11 +105,12 @@ function SignInForm(props){
                 <img src={odinbookImg} width="200px" height="50px"/>
                 <div> Connect with friends and the world around you on Odinbook. </div>
             </div>
-            <form className='my-form'>
-                <label className='form-label' htmlFor='email'> Enter your e-mail</label>
-                <input className='form-input' id='email' name='email' placeholder='enter email here'/>
-                <label className='form-label' htmlFor='password'> Enter password</label>
-                <input className='form-input' id='password' name='password' placeholder='password'/>
+            <form id='log-in-form' className='my-form'>
+                <TextField variant='outlined' required label='Email' name='email' id='email' margin='normal' style={{width:'100%'}}/>
+                <TextField variant='outlined' type='password' required label='password' name='password' id='password' margin='normal' style={{width:'100%'}}/>              
+                {logInState.errors.length!=0 && <div style={{color:'red',margin:'5px',fontSize:'0.9rem'}}>
+                    {logInState.errors}
+                    </div>}
                 <MyButton onClick={LogIn}> Log In </MyButton>
                 <MyButton onClick={(e)=>{ e.preventDefault();setSignInIsOpen(!signInIsOpen);}}
                  style={{backgroundColor:'rgb(72, 182, 54)'}}> Create an account </MyButton>

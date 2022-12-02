@@ -5,6 +5,7 @@ import SignInForm from './Components/SignInComponent/SignInForm.js';
 
 
 var apiDir = 'http://localhost:3000/';
+window.sessionStorage.setItem('apiDir','http://localhost:3000');
 
 function App() {
   const [state, setState] = useState({data:10});
@@ -32,7 +33,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path='/' element={ <TempIndexComponent/>}/>
-          <Route path='/signIn' element={<SignInForm/>}/>
+          <Route path='/LogIn' element={<SignInForm/>}/>
         </Routes>
       </BrowserRouter>
     </div>
