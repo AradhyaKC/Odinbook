@@ -6,6 +6,8 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import { useState } from 'react';
 import {Button } from '@mui/material';
+import {GoogleLogin} from "@react-oauth/google";
+import config from "../../config.json";
 
 function SignInForm(props){
 
@@ -23,7 +25,7 @@ function SignInForm(props){
             for(const [key,value] of formData){
                 formObj[key]=value;
             }
-            var response = await fetch(window.sessionStorage.getItem('apiDir')+'/users',{
+            var response = await fetch(config.REACT_APP_BASE_URL +'/users',{
                 method:'POST', headers:new Headers({'Content-Type':'application/json'}),
                 body:JSON.stringify(formObj),
             });
@@ -82,7 +84,7 @@ function SignInForm(props){
         for(const [key,value] of formData){
             formObj[key]=value;
         }
-        var response = await fetch(window.sessionStorage.getItem('apiDir')+'/users/LogIn',{
+        var response = await fetch(config.REACT_APP_BASE_URL +'/users/LogIn',{
             method:'POST',headers:new Headers({'content-type':'application/json'}),
             // body:JSON.stringify(`email=${formObj['email']}&password=${formObj['password']}`),
             body:JSON.stringify({email:formObj['email'],password:formObj['password']}),
@@ -97,6 +99,20 @@ function SignInForm(props){
             setLoginState({errors:[]});
         }
     }
+    const responseSuccessGoogle=async(response)=>{
+        var response =await fetch(config.REACT_APP_BASE_URL +'/users/auth/google/token', {
+            method:'POST',headers:new Headers({'content-type':'application/json'}),mode:'cors',
+            body:JSON.stringify({token:response.credential}),
+        });
+        response= await response.json();
+        if(responseSuccessGoogle.message=='success'){
+            window.sessionStorage.setItem('user',JSON.stringify(response.user));
+            //redirect to home
+        }else{
+            throw 'server error';
+        }
+    }
+    
 
     return (
         <div className='flex-container'>
@@ -115,7 +131,10 @@ function SignInForm(props){
                 <MyButton onClick={(e)=>{ e.preventDefault();setSignInIsOpen(!signInIsOpen);}}
                  style={{backgroundColor:'rgb(72, 182, 54)'}}> Create an account </MyButton>
                 <MyButton style={{backgroundColor:'orange'}}> Test drive an existing account </MyButton>
-                <MyButton style={{backgroundColor:'blue'}}>  Log in with Fb</MyButton>
+                {/* <MyButton style={{backgroundColor:'blue'}} onClick={GoogleLogIn}>  Log in with Google</MyButton> */}
+                <div style={{margin:'9px auto'}}>
+                <GoogleLogin onSuccess={responseSuccessGoogle} onError={()=>{console.log('something went wrong');}}/>
+                </div>
             </form>
         </div>
     );

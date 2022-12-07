@@ -4,6 +4,7 @@ const {body,validationResult}=require('express-validator');
 var router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
+const jwt_decode = require('jwt-decode');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -45,7 +46,6 @@ router.post('/',[
       }
       var newUser= new User({first_name,last_name,email,password});
       newUser.save((err)=>{
-        // console.log(err);
         if(err) return next(err);
       });
       return res.status(200).json({errors:undefined});
@@ -54,20 +54,46 @@ router.post('/',[
 ]);
 
 router.post('/LogIn',function(req,res,next){
-  // console.log(req);
   passport.authenticate('local',(error,user,info)=>{
-    // console.log('the user ' +user);
-    // console.log('the error Obj= ' +error);
     if(error) return res.status(500).json({message:error ||'something happenned (failed to authenticate user)'});
     if(!user) return res.status(500).json({message:info.message});
-    // req.logIn(user,err=>{
-    //   if(err) throw err; // should not throw errors on server;
-    //   // res.status(200).json({message:})
-    //   //res.send('succesfully Authenticated');
-    // });
     user['password'] =undefined;
     return res.status(200).json({message:'success',user});
   })(req,res,next);
+});
+
+router.get('/auth/google',
+  passport.authenticate('google',{scope:['email','profile']})
+);
+
+router.get('/auth/google/callback',
+  passport.authenticate('google'),
+  function(req,res,next){
+    console.log(req.user);
+    return res.status(201).json({
+      message:'success',
+      user:{
+        id:req.user._id, first_name:req.user.first_name, last_name:req.user.last_name,email:req.user.email,
+        googleId:req.user.googleId,password:undefined
+      }
+    });
+  }
+);
+
+
+router.post('/auth/google/token',function(req,res,next){
+  var decoded = jwt_decode(req.body.token);
+  User.findOrCreate({
+    googleId:decoded.sub,
+    first_name:decoded.given_name,
+    last_name:decoded.family_name,
+    email:decoded.email,
+  },(err,user)=>{
+    if(err) return next('failed in finding or creating google account');
+    return res.status(201).json({
+      message:'token success', user:user
+    });
+  });
 });
 
 module.exports = router;
