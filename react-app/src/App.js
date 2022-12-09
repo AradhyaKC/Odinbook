@@ -4,10 +4,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignInForm from './Components/SignInComponent/SignInForm.js';
 import Navbar from './Components/NavbarComponent/Navbar.js';
 import { ThemeProvider, createTheme,Button} from '@mui/material';
-<<<<<<< HEAD
-=======
-import {purple} from '@mui/material/colors'
->>>>>>> 736f2676be405dbc992e4e79ca6b19dfeb2e342d
 
 function App() {
   

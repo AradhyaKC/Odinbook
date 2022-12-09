@@ -10,7 +10,6 @@
 #odinbook-img{
     width: 125px;
 }
-<<<<<<< HEAD
 #user-img{
     border-radius: 50%;
     width: 35px;
@@ -30,17 +29,12 @@
 }
 
 @media screen and (max-width:375px){
-=======
-
-@media screen and (max-width:350px){
->>>>>>> 736f2676be405dbc992e4e79ca6b19dfeb2e342d
     #odinbook-img{
         width:100px;
     }
     #user-img{
         width: 25px;
     }
-<<<<<<< HEAD
     #username{
         font-size: 0.8rem;
         margin-left: 0px;
@@ -49,6 +43,4 @@
     #buttons{
         padding-right:5px;
     }
-=======
->>>>>>> 736f2676be405dbc992e4e79ca6b19dfeb2e342d
 }
