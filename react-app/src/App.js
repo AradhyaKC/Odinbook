@@ -2,40 +2,47 @@ import './App.css';
 import {useState} from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignInForm from './Components/SignInComponent/SignInForm.js';
-
-
-var apiDir = 'http://localhost:3000/';
-window.sessionStorage.setItem('apiDir','http://localhost:3000');
+import Navbar from './Components/NavbarComponent/Navbar.js';
+import { ThemeProvider, createTheme,Button} from '@mui/material';
+import {purple} from '@mui/material/colors'
 
 function App() {
-  const [state, setState] = useState({data:10});
-
-  const onSubmit =async (e)=>{
-    e.preventDefault();
-
-    var response = await fetch(apiDir, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name:'hello servers'})
-    }).catch((err)=>{
-      console.log('fetch call failed ' +err);
-      return;
-    });
+  
+  const darkTheme = createTheme({
+    palette: {
+      mode:'dark'
+      // primary: {
+        //   main:'#272727',
+        // },
+      },
+  });
+  const defaultTheme=createTheme({});
+  
+  const [state, setState] = useState({theme:'default'});
     
-    response=await response.json();
-
-    console.log(response);
-    await setState('form working');
+  const ToggleTheme = async ()=>{
+    await setState((prevState)=>{
+      var newState= {...prevState};
+      if(prevState.theme=='default')
+        newState.theme='dark';
+      else newState.theme='default';
+      return newState;
+    });
+    return state.theme;
   }
 
   const TempIndexComponent=()=>{ return <div>you are now viewing the esteemed index page </div>}
   return (
     <div className="center">
-      <BrowserRouter>
-        <Routes>
-          <Route path='/' element={ <TempIndexComponent/>}/>
-          <Route path='/LogIn' element={<SignInForm/>}/>
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider theme={state.theme=='default'?defaultTheme:darkTheme}>
+        <BrowserRouter>
+          <Routes>
+            <Route path='/' element={ <TempIndexComponent/>}/>
+            <Route path='/LogIn' element={<SignInForm/>}/>
+            <Route path='/NavbarTest' element={<Navbar toggleTheme={ToggleTheme}/>}/>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </div>
   );
 }

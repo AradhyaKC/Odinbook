@@ -96,4 +96,8 @@ router.post('/auth/google/token',function(req,res,next){
   });
 });
 
+router.get('/:userId',function(req,res){
+  console.log(req.params.userId);
+});
+
 module.exports = router;

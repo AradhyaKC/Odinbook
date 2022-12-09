@@ -1,0 +1,21 @@
+.flex-container{
+    display: flex;
+    flex-direction: row;
+    height: min-content;
+    /* padding: 5px; */
+    background-color: rgba(0, 0, 0, 0);
+    align-items: center;
+}
+
+#odinbook-img{
+    width: 125px;
+}
+
+@media screen and (max-width:350px){
+    #odinbook-img{
+        width:100px;
+    }
+    #user-img{
+        width: 25px;
+    }
+}
