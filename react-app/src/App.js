@@ -4,18 +4,27 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignInForm from './Components/SignInComponent/SignInForm.js';
 import Navbar from './Components/NavbarComponent/Navbar.js';
 import { ThemeProvider, createTheme,Button} from '@mui/material';
+import Profile from './Components/ProfileComponent/Profile.js';
+import Box from '@mui/material/Box';
 
 function App() {
   
   const darkTheme = createTheme({
     palette: {
-      mode:'dark'
+      mode:'dark',
+      grey:{
+        '800':'#333333'
+      }
       // primary: {
         //   main:'#272727',
         // },
       },
   });
-  const defaultTheme=createTheme({});
+  const defaultTheme=createTheme({
+    palette:{
+      mode:'light',
+    }
+  });
   
   const [state, setState] = useState({theme:'default'});
     
@@ -36,11 +45,17 @@ function App() {
     <div className="center">
       <ThemeProvider theme={state.theme=='default'?defaultTheme:darkTheme}>
         <BrowserRouter>
-          <Routes>
-            <Route path='/' element={ <TempIndexComponent/>}/>
-            <Route path='/LogIn' element={<SignInForm/>}/>
-            <Route path='/NavbarTest' element={<Navbar toggleTheme={ToggleTheme}/>}/>
-          </Routes>
+          <Navbar toggleTheme={ToggleTheme}/>
+          <Box sx={{height:'100%',width:'100%',flexGrow:'1',display:'flex',flexDirection:'column',
+          backgroundColor:(state.theme=='dark'?'grey.900':'grey.200')}}>
+            <div style={{height:'40px',}}> hello there</div>
+          {/* position:'relative',transform:'translate(-50%,0%)',left:'50%'}}> */}
+            <Routes>
+              <Route path='/' element={ <TempIndexComponent/>}/>
+              <Route path='/LogIn' element={<SignInForm/>}/>
+              <Route path='/Profile' element={<Profile/>}/>
+            </Routes>
+          </Box>
         </BrowserRouter>
       </ThemeProvider>
     </div>

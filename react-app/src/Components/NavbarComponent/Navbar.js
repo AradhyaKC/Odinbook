@@ -47,7 +47,7 @@ function Navbar(props){
                 <div style={{flexGrow:'1',textAlign:'left',paddingLeft:'7%',verticalAlign:'center'}}>
                     <img id='odinbook-img' src={OdinbookImg}/>
                 </div>
-                <div id='buttons'>
+                {(user!=null &&user!=undefined && Object.keys(user).length!=0) && <div id='buttons'>
                     <img  id='user-img' src={UserImg}/> 
                     <div id='username' style={{color:'white'}}> {user.first_name} </div>
                     <IconButton onClick={onToggleTheme} color='inherit'>
@@ -56,7 +56,7 @@ function Navbar(props){
                     <IconButton onClick={LogOut}>
                         <Logout htmlColor="white"/>
                     </IconButton>
-                </div>
+                </div>}
             </div>
         </AppBar>
         </ElevationScroll>
