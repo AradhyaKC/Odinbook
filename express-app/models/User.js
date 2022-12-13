@@ -8,6 +8,9 @@ const UserSchema =new Schema({
     email:{type:String,required:true,unique:true},
     password:{type:String, required:false, minLength:3, maxLength:100},
     googleId:{type:String, required:false},
+    joinDate:{type:Date,required:false,},
+    description:{type:String,required:false,minLenght:3},
+    profilePicUrl:{type:String,required:false},
 });
 UserSchema.plugin(findOrCreate);
 
