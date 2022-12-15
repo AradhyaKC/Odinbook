@@ -95,6 +95,8 @@ function SignInForm(props){
         if(response.message!='success'){
             setLoginState({errors:[...response.message]})
         }else{
+            const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
+            response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
             window.sessionStorage.setItem('user',JSON.stringify(response.user));
             setLoginState({errors:[]});
         }
@@ -105,7 +107,8 @@ function SignInForm(props){
             body:JSON.stringify({token:response.credential}),
         });
         response= await response.json();
-        if(responseSuccessGoogle.message=='success'){
+        console.log(response);
+        if(response.message=='success'){
             window.sessionStorage.setItem('user',JSON.stringify(response.user));
             //redirect to home
         }else{

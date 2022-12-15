@@ -10,7 +10,11 @@ const UserSchema =new Schema({
     googleId:{type:String, required:false},
     joinDate:{type:Date,required:false,},
     description:{type:String,required:false,minLenght:3},
-    profilePicUrl:{type:String,required:false},
+    profilePicUrl:{
+        name:String,
+        data:Buffer,
+        contentType:String
+    },
 });
 UserSchema.plugin(findOrCreate);
 

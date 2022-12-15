@@ -5,6 +5,8 @@ var router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const jwt_decode = require('jwt-decode');
+const multer =require('multer');
+const fs=require('fs');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -62,6 +64,65 @@ router.post('/LogIn',function(req,res,next){
   })(req,res,next);
 });
 
+const upload = multer({ dest: 'uploads/' ,fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype == 'image/png' ||
+      file.mimetype == 'image/jpeg' ||
+      file.mimetype == 'image/jpg'
+    ) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+      const err = new Error('Only .jpg .jpeg .png images are supported!');
+      err.name = 'ExtensionError';
+      return cb(err);
+    }
+  }
+}).single('profilePicUrl');
+
+router.patch('/:userId',(req, res,next) => 
+  {
+    upload(req, res, function (err) 
+    {
+      if (err instanceof multer.MulterError) {
+        console.log(err);
+        res.status(500).send({error: { msg: `multer uploading error: ${err.message}` },}).end();
+        return;
+      } else if (err) 
+      {
+        if (err.name == 'ExtensionError') 
+        {
+          res.status(413).send({ error: { msg: `${err.message}` } }).end();
+        } else 
+        {
+          res.status(500).send({ error: { msg: `unknown uploading error: ${err.message}` } }).end();
+        } 
+        return;
+      }
+      next();
+    })  
+  },
+  (req,res)=>{
+    // console.log(req.params.userId);
+    // console.log(req.body);
+    User.updateOne({_id:req.params.userId},{'$set':{
+      first_name:req.body.first_name, last_name:req.body.last_name, description:req.body.description,profilePicUrl:{
+        'name':req.body.first_name+'image',data:fs.readFileSync('uploads/'+req.file.filename), contentType:req.file.mimetype,
+      }
+    }},(err, result)=>{
+      if(err) return res.status(400).json({message:'error',errors:['failed to update or find existing user']});
+      User.findById(req.params.userId,(err,user)=>{
+        user['password']=undefined;
+        // const base64String= btoa(String.fromCharCode(...new Uint8Array(user['profilePicUrl'].data)));
+        // user['profilePicUrl']=`data:${user['profilePicUrl'].contentType};base64,${base64String}`;
+        return res.status(200).json({message:'success',user:user});
+      });
+    });
+
+    // console.log(fs.readFileSync('uploads/'+req.file.filename));
+  }
+);
+
 router.get('/auth/google',
   passport.authenticate('google',{scope:['email','profile']})
 );
@@ -91,7 +152,7 @@ router.post('/auth/google/token',function(req,res,next){
   },(err,user)=>{
     if(err) return next('failed in finding or creating google account');
     return res.status(201).json({
-      message:'token success', user:user
+      message:'success', user:user
     });
   });
 });

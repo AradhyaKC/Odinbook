@@ -11,6 +11,7 @@ import Close from '@mui/icons-material/Close';
 import Edit from '@mui/icons-material/Edit';
 import Dialog from '@mui/material/Dialog';
 import { useEffect, useRef, useState } from 'react';
+import config from '../../config.json';
 
 //new user fields : description , joinDate , birthDate? , FriendList , PostList ,friendreqList,commentList?, profilePicUrl?
 
@@ -20,7 +21,7 @@ function Profile(props){
 
     var theme = useTheme();
     const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
-    const personProfile=JSON.parse(window.sessionStorage.getItem('user'));
+    const personProfile=JSON.parse(window.sessionStorage.getItem('user'));//needs to swapped with the profile of requested person;
      
     // const tempPersonProfile=JSON.parse(window.sessionStorage.getItem('user'));// swap it with profile of person
     // var personProfile = {...tempPersonProfile};  
@@ -34,18 +35,31 @@ function Profile(props){
     function EditProfileModal(props){
         const {open, handleClose} = props;
         const [displayImageUrl, setDisplayImageUrl] = useState((loggedInUser.profilePicUrl==undefined)?UserImg:loggedInUser.profilePicUrl);
-        const imageSelect =useRef(0);
-        imageSelect.current=document.getElementById('profilePicUrl');
-        
 
-        const onChangeProfilePic =()=>{
+        const onChangeProfilePic =(e)=>{
             var reader =new FileReader();
             reader.addEventListener('load',()=>{
                 const uploaded_image = reader.result;
-                // console.log(uploaded_image);
+                console.log(uploaded_image);
                 setDisplayImageUrl(uploaded_image);
             });
-            reader.readAsDataURL(imageSelect.current.files[0]);
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
+        const onFormSubmit=async(e)=>{
+            e.preventDefault();
+            const formData = new FormData(document.getElementById('edit-profile-form'));
+            console.log(formData['profilePicUrl'])
+            var response = await fetch(config.REACT_APP_BASE_URL + '/users/' +await JSON.parse(window.sessionStorage.getItem('user'))._id,
+            {
+                method:"PATCH",mode:'cors', body:formData, 
+            });
+            response = await response.json();
+            const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
+            response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
+            if(response.message=='success')
+                window.sessionStorage.setItem('user',JSON.stringify(response.user));
+            handleClose();
         }
 
         return (
@@ -68,6 +82,7 @@ function Profile(props){
                             name='description' id='description' variant='outlined'  style={{width:'95%'}} margin='dense' minRows='2'/>
                             <TextField label='' sx={{margin:'5px',width:'95%',}} name='profilePicUrl' id='profilePicUrl' type='file' 
                             accept='image/jpeg, image/png, image/jpg' onChange={onChangeProfilePic}/>
+                            <Button sc={{color:'primary.main',margin:'5px'}}variant='contained' onClick={onFormSubmit}> Confirm Edit</Button>
                         </div>
                     </Box>
                 </form>

@@ -48,7 +48,7 @@ function Navbar(props){
                     <img id='odinbook-img' src={OdinbookImg}/>
                 </div>
                 {(user!=null &&user!=undefined && Object.keys(user).length!=0) && <div id='buttons'>
-                    <img  id='user-img' src={UserImg}/> 
+                    <img  id='user-img' src={(user.profilePicUrl==undefined)?UserImg:user.profilePicUrl}/> 
                     <div id='username' style={{color:'white'}}> {user.first_name} </div>
                     <IconButton onClick={onToggleTheme} color='inherit'>
                         {state.theme=='dark'?<Brightness4/>:<Brightness7/>}
