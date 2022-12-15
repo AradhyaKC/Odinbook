@@ -8,11 +8,13 @@ import { useState } from 'react';
 import {Button } from '@mui/material';
 import {GoogleLogin} from "@react-oauth/google";
 import config from "../../config.json";
+import { useNavigate } from 'react-router-dom';
 
 function SignInForm(props){
 
     const [signInIsOpen,setSignInIsOpen] = useState(false);
     const [logInState,setLoginState] = useState({errors:[]});
+    var navigate = useNavigate();
 
     function SignInModal(props){
         const {open, handleClose} = props;
@@ -95,10 +97,13 @@ function SignInForm(props){
         if(response.message!='success'){
             setLoginState({errors:[...response.message]})
         }else{
-            const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
-            response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
+            if(response.user['profilePicUrl']!=undefined){
+                const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
+                response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
+            }
             window.sessionStorage.setItem('user',JSON.stringify(response.user));
             setLoginState({errors:[]});
+            navigate('/Profile');
         }
     }
     const responseSuccessGoogle=async(response)=>{

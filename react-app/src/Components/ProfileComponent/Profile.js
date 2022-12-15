@@ -123,7 +123,7 @@ function Profile(props){
                     <Divider/>
                     <Box color='text.secondary' style={{textAlign:'left',fontSize:'0.9rem',padding:'3px'}} ml='4px'> 
                         Member since {(personProfile.joinDate==undefined)?'August 2021':
-                        personProfile.joinDate.toDateString()}
+                        personProfile.joinDate}
                     </Box>
                 </Box>
                 

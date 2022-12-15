@@ -46,7 +46,10 @@ router.post('/',[
       if(newArray.length!=0){
         return res.status(100).json({errors:newArray});
       }
-      var newUser= new User({first_name,last_name,email,password});
+      
+      var joinDate=new Date(Date.now());
+      joindDate=joinDate.toDateString();
+      var newUser= new User({first_name,last_name,email,password,joinDate});
       newUser.save((err)=>{
         if(err) return next(err);
       });
@@ -113,8 +116,7 @@ router.patch('/:userId',(req, res,next) =>
       if(err) return res.status(400).json({message:'error',errors:['failed to update or find existing user']});
       User.findById(req.params.userId,(err,user)=>{
         user['password']=undefined;
-        // const base64String= btoa(String.fromCharCode(...new Uint8Array(user['profilePicUrl'].data)));
-        // user['profilePicUrl']=`data:${user['profilePicUrl'].contentType};base64,${base64String}`;
+        
         return res.status(200).json({message:'success',user:user});
       });
     });
