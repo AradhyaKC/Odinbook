@@ -18,10 +18,16 @@ import config from '../../config.json';
 function Profile(props){
 
     const [editIsOpen,setEditIsOpen] = useState(false);
+    const [newPostRenderToggle,setNewPostRenderToggle] = useState(true);
+    
 
     var theme = useTheme();
     const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
     const personProfile=JSON.parse(window.sessionStorage.getItem('user'));//needs to swapped with the profile of requested person;
+
+    const [personProfilePosts,setPersonProfilePosts] = useState(async()=>{
+        var response = await fetch(config.REACT_APP_BASE_URL+'/posts/'+personProfile._id);
+    });
      
     // const tempPersonProfile=JSON.parse(window.sessionStorage.getItem('user'));// swap it with profile of person
     // var personProfile = {...tempPersonProfile};  
@@ -91,6 +97,10 @@ function Profile(props){
         </Dialog>
         );
     }
+
+    useEffect(()=>{
+
+    },[newPostRenderToggle]);
 
     return (
         <Box id='profile-flex' >
@@ -195,9 +205,10 @@ function Profile(props){
                 </Box>
             </div>
             <div id='big-div'>
-                {loggedInUser._id==personProfile._id && <PostForm/>}
+                {loggedInUser._id==personProfile._id && <PostForm setPosts={setNewPostRenderToggle}/>}
                 <div style={{marginTop:'10px'}}>
                 {/* Posts */}
+                <Post/>
                 <Post/>
                 <Post style={{marginTop:'10px'}} />
                 </div>

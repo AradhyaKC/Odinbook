@@ -10,14 +10,14 @@ import Comment from '../Comment/Comment';
 
 function Post(props){
     const theme = useTheme();
-    const {postObj} =props;
+    const {postobj} =props;
     return (
     <Box  {...props} borderRadius='5px' sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),width:'100%',overflow:'hidden'}} >
         <Box sx={{backgroundColor:(theme.palette.mode=='light'?'grey.300':'grey.A700'),display:'flex',flexDirection:'row',padding:'7px',
         alignItems:'center',paddingLeft:'15px'}}>
             <img src={UserImg} style={{width:'35px',height:'35px'}} />
             <div style={{overflow:'hidden',flexGrow:'1',width:'0px',textAlign:'left',}}>
-                <Typography fontWeight='500' color='text.primary' fontSize='1.2rem'>ImAmGoodName </Typography>
+                <Typography fontWeight='500' color='text.primary' fontSize='1.2rem'>{postobj!=undefined?postobj.postedBy:"IMAMGOODName"} </Typography>
                 <Typography fontSize='0.7rem' ml='5px' color='text.secondary'> posted yesterday at 1:10 PM</Typography>
             </div>
             <div style={{flexGrow:0,textAlign:'right'}}>

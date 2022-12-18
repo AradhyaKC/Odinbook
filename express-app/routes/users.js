@@ -111,7 +111,7 @@ router.patch('/:userId',(req, res,next) =>
     // console.log(req.body);
     User.updateOne({_id:req.params.userId},{'$set':{
       first_name:req.body.first_name, last_name:req.body.last_name, description:req.body.description,profilePicUrl:{
-        'name':req.body.first_name+'image',data:fs.readFileSync('uploads/'+req.file.filename), contentType:req.file.mimetype,
+        'name':req.file.filename,data:fs.readFileSync('uploads/'+req.file.filename), contentType:req.file.mimetype,
       }
     }},(err, result)=>{
       if(err) return res.status(400).json({message:'error',errors:['failed to update or find existing user']});

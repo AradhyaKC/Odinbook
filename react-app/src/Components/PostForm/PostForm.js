@@ -9,6 +9,7 @@ import config from '../../config.json';
 function PostForm(props){
     const theme = useTheme();
     const [color,setColor]=useState('text.secondary');
+    const {setPosts}= props;
 
     const onSubmitPost =async(e)=>{
         e.preventDefault();
@@ -25,7 +26,10 @@ function PostForm(props){
             mode:'cors', body:JSON.stringify(formObj),method:'POST', headers:new Headers({'Content-Type':'application/json'}),
         });
         response = await response.json();
-        console.log(response);
+        if(response.message=='success')
+            setPosts((prevState)=>{
+                return !prevState;  
+            });
     }
     const changeColor=(e)=>{
         setColor('text.primary');

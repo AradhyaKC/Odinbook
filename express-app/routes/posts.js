@@ -26,7 +26,6 @@ body('description').escape(),
                 return res.status(400).json({message:'error',errors:errors});
             }
             var {description,postedBy,postedOn} = req.body;
-            postedOn = new Date(postedOn);
             var newPost =new Post({description,postedOn,postedBy});
             newPost.save((err,post)=>{
                 if(err) return res.status(500).json({message:'error',errors:err});
@@ -35,6 +34,18 @@ body('description').escape(),
         }
     }
     );
+});
+
+router.get('/:userId',(req,res)=>{
+    Post.find({postedBy:req.params.userId}).populate({path:'postedBy',model:'User',select:{first_name:1,last_name:1,profilePicUrl:1}}).exec((err,results)=>{
+        if(err){
+            console.log(err);
+            return res.status(500).json({message:'error',errors:err});
+        } 
+        // console.log(results);
+        return res.status(200).json({message:'success',posts:results});
+    });
+    return;
 });
 
 module.exports= router;
