@@ -29,26 +29,27 @@ router.post('/',[
   async function(req,res,next){
     var {first_name,last_name,email,password} = req.body;
     const errors = validationResult(req);
-    
+
     await bcrypt.hash(password,3,function(err,hash){
       password=hash;
     });
-    
+
     await User.find({email:email}).exec(function(err,result){
       if(err) return next(err);
-      
+
       var newArray;
       newArray =errors.array();
       if(result.length!=0) {
         newArray.push({param:'email',msg:'there already exists an account with this email address',location:'body'});
       }
-      
+
       if(newArray.length!=0){
         return res.status(100).json({errors:newArray});
       }
-      
-      var joinDate=new Date(Date.now());
-      joindDate=joinDate.toDateString();
+
+      let joinDate=new Date(Date.now());
+      joinDate=joinDate.toDateString();
+      joinDate=joinDate.slice(0,16);
       var newUser= new User({first_name,last_name,email,password,joinDate});
       newUser.save((err)=>{
         if(err) return next(err);
@@ -83,27 +84,27 @@ const upload = multer({ dest: 'uploads/' ,fileFilter: (req, file, cb) => {
   }
 }).single('profilePicUrl');
 
-router.patch('/:userId',(req, res,next) => 
+router.patch('/:userId',(req, res,next) =>
   {
-    upload(req, res, function (err) 
+    upload(req, res, function (err)
     {
       if (err instanceof multer.MulterError) {
         console.log(err);
         res.status(500).send({error: { msg: `multer uploading error: ${err.message}` },}).end();
         return;
-      } else if (err) 
+      } else if (err)
       {
-        if (err.name == 'ExtensionError') 
+        if (err.name == 'ExtensionError')
         {
           res.status(413).send({ error: { msg: `${err.message}` } }).end();
-        } else 
+        } else
         {
           res.status(500).send({ error: { msg: `unknown uploading error: ${err.message}` } }).end();
-        } 
+        }
         return;
       }
       next();
-    })  
+    })
   },
   (req,res)=>{
     // console.log(req.params.userId);
@@ -116,7 +117,7 @@ router.patch('/:userId',(req, res,next) =>
       if(err) return res.status(400).json({message:'error',errors:['failed to update or find existing user']});
       User.findById(req.params.userId,(err,user)=>{
         user['password']=undefined;
-        
+
         return res.status(200).json({message:'success',user:user});
       });
     });
@@ -162,5 +163,16 @@ router.post('/auth/google/token',function(req,res,next){
 router.get('/:userId',function(req,res){
   console.log(req.params.userId);
 });
+
+// router.post('/:userId/posts/',
+// // body('postedBy', 'the id of the user posting was invalid or the user could npt be found').custom(async (postedByUserId)=>{
+// //   var user = await User.findById(postedByUserId);
+// //   if(!user) return false;
+// //   else return true
+// // }), 
+// (req,res)=>{
+//   console.log(req.params.userId);
+//   return res.json({tempObject:'hello'});
+// });
 
 module.exports = router;

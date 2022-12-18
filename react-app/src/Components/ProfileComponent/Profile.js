@@ -49,7 +49,7 @@ function Profile(props){
         const onFormSubmit=async(e)=>{
             e.preventDefault();
             const formData = new FormData(document.getElementById('edit-profile-form'));
-            console.log(formData['profilePicUrl'])
+            // console.log(formData['profilePicUrl'])
             var response = await fetch(config.REACT_APP_BASE_URL + '/users/' +await JSON.parse(window.sessionStorage.getItem('user'))._id,
             {
                 method:"PATCH",mode:'cors', body:formData, 
