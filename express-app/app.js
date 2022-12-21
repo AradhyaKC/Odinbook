@@ -13,13 +13,15 @@ const User = require('./models/User');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
+var app = express();
+module.exports = app;
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var postsRouter = require('./routes/posts');
 var cors = require('cors');
 
-var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -109,6 +111,15 @@ app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// app.use('*',(req,res,next)=>{
+//   const protocol = req.protocol;
+//   const host = req.hostname;
+//   const port = app.get('port');
+//   app.set('SERVER_DOMAIN',`${protocol}://${host}:${port}`);
+//   // console.log(app.get("SERVER_DOMAIN"));
+//   next()
+// });
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/posts',postsRouter);
@@ -137,5 +148,3 @@ const db = mongoose.connection;
 db.on('error',()=>{
   console.error('mongodb connection error');
 })
-
-module.exports = app;

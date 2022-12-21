@@ -26,7 +26,14 @@ function Profile(props){
     const personProfile=JSON.parse(window.sessionStorage.getItem('user'));//needs to swapped with the profile of requested person;
 
     const [personProfilePosts,setPersonProfilePosts] = useState(async()=>{
-        var response = await fetch(config.REACT_APP_BASE_URL+'/posts/'+personProfile._id);
+        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/posts/'+personProfile._id);
+        response=await response.json();
+        //handle images , dates 
+        if(response.message=='success')
+        return response.posts;
+        
+        console.error("failed to fetch posts");
+        return {};
     });
      
     // const tempPersonProfile=JSON.parse(window.sessionStorage.getItem('user'));// swap it with profile of person
@@ -40,7 +47,8 @@ function Profile(props){
     }
     function EditProfileModal(props){
         const {open, handleClose} = props;
-        const [displayImageUrl, setDisplayImageUrl] = useState((loggedInUser.profilePicUrl==undefined)?UserImg:loggedInUser.profilePicUrl);
+        const [displayImageUrl, setDisplayImageUrl] = 
+        useState(config.EXPRESS_APP_BASE_URL+'/users/'+personProfile._id+'/profileImage');
 
         const onChangeProfilePic =(e)=>{
             var reader =new FileReader();
@@ -56,16 +64,21 @@ function Profile(props){
             e.preventDefault();
             const formData = new FormData(document.getElementById('edit-profile-form'));
             // console.log(formData['profilePicUrl'])
-            var response = await fetch(config.REACT_APP_BASE_URL + '/users/' +await JSON.parse(window.sessionStorage.getItem('user'))._id,
+            var response = await fetch(config.EXPRESS_APP_BASE_URL + '/users/' +await JSON.parse(window.sessionStorage.getItem('user'))._id,
             {
                 method:"PATCH",mode:'cors', body:formData, 
             });
             response = await response.json();
-            const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
-            response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
-            if(response.message=='success')
+            // const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
+            // response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
+            if(response.message=='success'){
+
                 window.sessionStorage.setItem('user',JSON.stringify(response.user));
-            handleClose();
+                handleClose();
+            }
+            else if(response.message=='error'){
+                console.log(response);
+            }
         }
 
         return (
@@ -109,7 +122,7 @@ function Profile(props){
 
                 {/* PersonInfo */}
                 <div style={{display:'flex',flexDirection:'row',alignItems:'center',overflow:'hidden',marginTop:'10px'}}>
-                    <img src={(personProfile.profilePicUrl!=undefined)?personProfile.profilePicUrl:UserImg} style={{borderRadius:'50%',width:'100px'}}/>
+                    <img src={config.EXPRESS_APP_BASE_URL+'/users/'+personProfile._id+'/profileImage'} style={{borderRadius:'50%',width:'100px'}}/>
                     <div>
                         <Typography color='text.primary' style={{fontSize:'1.3rem',fontWeight:'500',overflow:'hidden'}} > {personProfile.first_name +' '+personProfile.last_name} </Typography>
                         <Typography color='text.primary' style={{fontSize:'0.9rem',fontWeight:'400',overflow:'hidden'}}>{personProfile.email}</Typography>

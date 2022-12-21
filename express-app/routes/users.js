@@ -7,6 +7,8 @@ const bcrypt = require('bcrypt');
 const jwt_decode = require('jwt-decode');
 const multer =require('multer');
 const fs=require('fs');
+const async = require('async');
+const path = require('path');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -68,45 +70,55 @@ router.post('/LogIn',function(req,res,next){
   })(req,res,next);
 });
 
-const upload = multer({ dest: 'uploads/' ,fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype == 'image/png' ||
-      file.mimetype == 'image/jpeg' ||
-      file.mimetype == 'image/jpg'
-    ) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-      const err = new Error('Only .jpg .jpeg .png images are supported!');
-      err.name = 'ExtensionError';
-      return cb(err);
-    }
+var storage= multer.diskStorage({destination: 'uploads/' ,fileFilter: (req, file, cb) => {
+  if (
+    file.mimetype == 'image/png' ||
+    file.mimetype == 'image/jpeg' ||
+    file.mimetype == 'image/jpg'
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+    const err = new Error('Only .jpg .jpeg .png images are supported!');
+    err.name = 'ExtensionError';
+    return cb(err);
   }
-}).single('profilePicUrl');
+},
+filename:function(req,file,cb){
+  let fileType= file.mimetype;
+  fileType = fileType.slice(6);
+  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+  // console.log(file.fieldname + '-' + uniqueSuffix+'.'+fileType);
+  return cb(null, file.fieldname + '-' + uniqueSuffix+'.'+fileType);
+}
+});
+const upload = multer({storage:storage}).single('profilePicUrl');
 
 router.patch('/:userId',(req, res,next) =>
   {
     upload(req, res, function (err)
     {
+      console.log(req);
       if (err instanceof multer.MulterError) {
         console.log(err);
-        res.status(500).send({error: { msg: `multer uploading error: ${err.message}` },}).end();
+        res.status(501).json({error: { msg: `multer uploading error: ${err.message}` },}).end();
         return;
       } else if (err)
       {
         if (err.name == 'ExtensionError')
         {
-          res.status(413).send({ error: { msg: `${err.message}` } }).end();
+          res.status(413).json({ message:'error',error: { msg: `${err.message}` } }).end();
         } else
         {
-          res.status(500).send({ error: { msg: `unknown uploading error: ${err.message}` } }).end();
+          res.status(500).json({  message:'error',error: { msg: `unknown uploading error: ${err.message}` } }).end();
         }
         return;
       }
       next();
-    })
+    });
   },
   (req,res)=>{
+    console.log('called here')
     // console.log(req.params.userId);
     // console.log(req.body);
     User.updateOne({_id:req.params.userId},{'$set':{
@@ -116,8 +128,11 @@ router.patch('/:userId',(req, res,next) =>
     }},(err, result)=>{
       if(err) return res.status(400).json({message:'error',errors:['failed to update or find existing user']});
       User.findById(req.params.userId,(err,user)=>{
-        user['password']=undefined;
-
+        if(err) return res.status(500).json({message:'error',errors:err});
+        user.password=undefined;
+        // console.log(app.get('SERVER_DOMAIN')+'/users/'+req.params.userId+'/profileImage');
+        // newUser.profilePicUrl.name1= app.get('SERVER_DOMAIN')+'/'+req.params.userId+'/profileImage';
+        // console.log(newUser);
         return res.status(200).json({message:'success',user:user});
       });
     });
@@ -164,6 +179,26 @@ router.get('/:userId',function(req,res){
   console.log(req.params.userId);
 });
 
+router.get('/:userId/profileImage',(req,res)=>{
+  async.parallel([
+    (callback)=>{
+      User.find({_id:req.params.userId},callback);
+    }
+  ],(err,results)=>{
+    if(err) return res.status(500).json({message:'error',errors:err});
+    // console.log(results[0]);
+    var picture=results[0][0]['profilePicUrl'];
+    // let imageFormat = results[0][0]['profilePicUrl']['contentType'];
+    // imageFormat = imageFormat.slice(6);
+    console.log(picture.name);
+    if(picture.name!='' && picture.name!=undefined){
+      // return res.sendFile(path.join(__dirname,'../upload s/'+picture['name']+'.'+imageFormat));
+      return res.sendFile(path.join(__dirname,'../uploads/'+picture['name']));
+    }else{ 
+      return res.sendFile(path.join(__dirname ,'../User.png'));
+    }
+  });
+})
 // router.post('/:userId/posts/',
 // // body('postedBy', 'the id of the user posting was invalid or the user could npt be found').custom(async (postedByUserId)=>{
 // //   var user = await User.findById(postedByUserId);

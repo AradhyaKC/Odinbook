@@ -22,7 +22,7 @@ function PostForm(props){
         for(const [key,value] of formData){
             formObj[key]=value;
         }
-        var response = await fetch(config.REACT_APP_BASE_URL+'/posts/',{
+        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/posts/',{
             mode:'cors', body:JSON.stringify(formObj),method:'POST', headers:new Headers({'Content-Type':'application/json'}),
         });
         response = await response.json();
