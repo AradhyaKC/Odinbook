@@ -28,7 +28,7 @@ function PostForm(props){
         });
         response = await response.json();
         if(response.message=='success'){
-            console.log(response.post);
+            // console.log(response.post);
             handlePostAddition(response.post);
         }
             

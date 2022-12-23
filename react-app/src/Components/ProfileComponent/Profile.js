@@ -1,17 +1,17 @@
 import './Profile.css';
 import Box from '@mui/material/Box';
 import { useTheme } from '@emotion/react';
-import { Button, CircularProgress, Divider, IconButton, TextField, Typography } from '@mui/material';
+import { Button, Divider, IconButton, TextField, Typography } from '@mui/material';
 import { dark } from '@mui/material/styles/createPalette';
 import UserImg from "../../assets/User.png";
 import PostForm from '../PostForm/PostForm.js';
-import Post from '../Post/Post.js';
 import Check from '@mui/icons-material/Check';
 import Close from '@mui/icons-material/Close';
 import Edit from '@mui/icons-material/Edit';
 import Dialog from '@mui/material/Dialog';
 import { useEffect, useRef, useState } from 'react';
 import config from '../../config.json';
+import PostsContainer from '../PostsContainer/PostsContainer';
 
 //new user fields : description , joinDate , birthDate? , FriendList , PostList ,friendreqList,commentList?, profilePicUrl?
 
@@ -24,26 +24,7 @@ function Profile(props){
     const personProfile=JSON.parse(window.sessionStorage.getItem('user'));//needs to swapped with the profile of requested person;
 
     const [personProfilePosts,setPersonProfilePosts] = useState(undefined);
-     
-    useEffect(()=>{
-        async function fetchData(){
-            var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+personProfile._id+'/posts/');
-            response=await response.json();
-            // console.log(response)
-            if(response.message=='success'){
-                // console.log(response.posts);
-                if(response.posts.length==0){
-                    setPersonProfilePosts([]);
-                }else{
-                    setPersonProfilePosts([...response.posts]);
-                }
-            }else{
-                console.error("failed to fetch posts");
-                setPersonProfilePosts([]);
-            }
-        }
-        fetchData();
-    },[]);
+
     // const tempPersonProfile=JSON.parse(window.sessionStorage.getItem('user'));// swap it with profile of person
     // var personProfile = {...tempPersonProfile};  
     // personProfile['description']=' this is tmeporary description written to test ui and ajsckajsncknaj aksjncaksnjcksjcnaks akjsnckjansckjancs';
@@ -119,19 +100,29 @@ function Profile(props){
         );
     }
 
-    const handlePostDeletion=(index)=>{
-        setPersonProfilePosts((prevState)=>{
-            var newState = [...prevState];
-            newState.splice(index,1);
-            return newState;
-        });
-    } 
+    var postsContainerRef = useRef();
     const handlePostAddition=(postObj)=>{
-        setPersonProfilePosts((prevState)=>{
-            var newState = [...prevState];
-            newState.push(postObj);
-            return newState;
-        });
+        postsContainerRef.current.addNewPost(postObj);
+    }
+
+    async function fetchData(){
+        var returnResult=undefined;
+        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+personProfile._id+'/posts/');
+        response=await response.json();
+        // console.log(response)
+        if(response.message=='success'){
+        // console.log(response.posts);
+            if(response.posts.length==0){
+                returnResult=[];
+            }else{
+                returnResult= [...response.posts];
+            }
+        }else{
+            console.error("failed to fetch posts");
+            returnResult=[];
+        }
+        // return Promise.resolve(returnResult);
+        return returnResult;
     }
 
     return (
@@ -238,20 +229,7 @@ function Profile(props){
             </div>
             <div id='big-div'>
                 {loggedInUser._id==personProfile._id && <PostForm handlePostAddition={handlePostAddition}/>}
-                <div style={{marginTop:'10px'}}>
-                    {/* Posts */}
-                    {personProfilePosts!=undefined &&  <>
-                        {personProfilePosts.length==0 && <CircularProgress/>}
-                        {personProfilePosts.length!=0 &&  personProfilePosts.map((element,index)=>{
-                            return <Post keyindex={index} key={index} postobj={element} style={{marginTop:'10px'}} handlepostdeletion={handlePostDeletion}/>
-                        }).reverse()}
-                    </>
-                    }
-                    
-                    {/* <Post postobj={personProfilePosts[0]}/>
-                    <Post/>
-                    <Post style={{marginTop:'10px'}} /> */}
-                </div>
+                <PostsContainer populatePosts={fetchData} ref={postsContainerRef}/>
             </div>
         </Box>
     );
