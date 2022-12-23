@@ -9,6 +9,7 @@ const multer =require('multer');
 const fs=require('fs');
 const async = require('async');
 const path = require('path');
+const postsRouter = require('./posts');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -98,7 +99,6 @@ router.patch('/:userId',(req, res,next) =>
   {
     upload(req, res, function (err)
     {
-      console.log(req);
       if (err instanceof multer.MulterError) {
         console.log(err);
         res.status(501).json({error: { msg: `multer uploading error: ${err.message}` },}).end();
@@ -118,7 +118,6 @@ router.patch('/:userId',(req, res,next) =>
     });
   },
   (req,res)=>{
-    console.log('called here')
     // console.log(req.params.userId);
     // console.log(req.body);
     User.updateOne({_id:req.params.userId},{'$set':{
@@ -190,7 +189,6 @@ router.get('/:userId/profileImage',(req,res)=>{
     var picture=results[0][0]['profilePicUrl'];
     // let imageFormat = results[0][0]['profilePicUrl']['contentType'];
     // imageFormat = imageFormat.slice(6);
-    console.log(picture.name);
     if(picture.name!='' && picture.name!=undefined){
       // return res.sendFile(path.join(__dirname,'../upload s/'+picture['name']+'.'+imageFormat));
       return res.sendFile(path.join(__dirname,'../uploads/'+picture['name']));
@@ -199,6 +197,8 @@ router.get('/:userId/profileImage',(req,res)=>{
     }
   });
 })
+
+// router.use('/:userId/posts',postsRouter);
 // router.post('/:userId/posts/',
 // // body('postedBy', 'the id of the user posting was invalid or the user could npt be found').custom(async (postedByUserId)=>{
 // //   var user = await User.findById(postedByUserId);

@@ -9,7 +9,8 @@ import config from '../../config.json';
 function PostForm(props){
     const theme = useTheme();
     const [color,setColor]=useState('text.secondary');
-    const {setPosts}= props;
+    const {handlePostAddition} = props;
+    // const personProfile= JSON.parse(window.sessionStorage.getItem('user'));
 
     const onSubmitPost =async(e)=>{
         e.preventDefault();
@@ -22,14 +23,15 @@ function PostForm(props){
         for(const [key,value] of formData){
             formObj[key]=value;
         }
-        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/posts/',{
+        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+user._id +'/posts/',{
             mode:'cors', body:JSON.stringify(formObj),method:'POST', headers:new Headers({'Content-Type':'application/json'}),
         });
         response = await response.json();
-        if(response.message=='success')
-            setPosts((prevState)=>{
-                return !prevState;  
-            });
+        if(response.message=='success'){
+            console.log(response.post);
+            handlePostAddition(response.post);
+        }
+            
     }
     const changeColor=(e)=>{
         setColor('text.primary');
