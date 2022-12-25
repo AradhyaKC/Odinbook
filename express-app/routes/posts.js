@@ -25,14 +25,32 @@ body('description').escape(),
             if(errors.errors.length!=0){
                 return res.status(400).json({message:'error',errors:errors});
             }
-            var {description,postedBy,postedOn} = req.body;
-            var newPost =new Post({description,postedOn,postedBy});
+            var {description,postedBy,postedOn,parentPost} = req.body;
+            var newPost;
+            if(parentPost!=undefined){
+                newPost=new Post({description,postedOn,postedBy,parentPost});
+                // console.log(newPost)
+            }else{
+                newPost =new Post({description,postedOn,postedBy});
+            }
+            //refactor to use async lib ? 
             newPost.save((err,post)=>{
                 Post.findOne({_id:post._id}).populate({path:'postedBy',model:'User',select:{_id:1,first_name:1,last_name:1}}).exec((err,result)=>{
                     if(err) return res.status(500).json({message:'error', error:err});
-                    console.log
-                    return res.status(200).json({message:'success',post:result});
+                    if(parentPost!=undefined) {
+                        Post.findOne({_id:parentPost}).exec((err,post)=>{
+                            if(err) return res.status(500).json({message:'error', error:err});
+                            post.comments.push(newPost._id);
+                            post.save((err,post)=>{
+                                if(err) return res.status(500).json({message:'error', error:err});
+                                return res.status(200).json({message:'success',post:result});
+                            });
+                        }); 
+                    }else{
+                        return res.status(200).json({message:'success',post:result});
+                    }
                 });
+
                 // if(err) return res.status(500).json({message:'error',errors:err});
                 // return res.json({message:'success',post:post});
             });
@@ -42,7 +60,7 @@ body('description').escape(),
 });
 
 router.get('/',(req,res)=>{
-    Post.find({postedBy:req.params.userId}).populate({path:'postedBy',model:'User',select:{_id:1,first_name:1,last_name:1}}).exec((err,results)=>{
+    Post.find({postedBy:req.params.userId,parentPost:undefined}).populate({path:'postedBy',model:'User',select:{_id:1,first_name:1,last_name:1}}).exec((err,results)=>{
         if(err){
             console.log(err);
             return res.status(500).json({message:'error',errors:err});
@@ -83,6 +101,32 @@ router.delete('/:postId',(req,res)=>{
         }
     });
     // Post.deleteOne({_id})
+});
+
+router.get('/:postId/comments', async (req,res)=>{
+    const populateRecursively=async(commentId)=>{
+        try{
+            var thisComment= await Post.findOne({_id:commentId},'_id description postedBy postedOn comments parentPost').
+            populate({path:'postedBy',select:{_id:1,first_name:1,last_name:1}});
+            // console.log(thisComment);
+            if(thisComment.comments.length==0){
+                thisComment.comments=[];
+                return thisComment;
+            }
+            else{
+                thisComment.comments=await Promise.all(thisComment.comments.map(async(elementId)=>{
+                    return await populateRecursively(elementId);
+                }));
+                return thisComment;
+            }    
+        }catch(err){
+            console.error('error ' + err);
+        }
+    }
+    
+    var returnComments = await populateRecursively(req.params.postId);
+    returnComments=returnComments.comments;
+    return res.status(200).json({message:'success',comments:returnComments});
 });
 
 module.exports= router;

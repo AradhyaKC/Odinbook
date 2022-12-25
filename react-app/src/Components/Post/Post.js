@@ -1,14 +1,20 @@
 import { useTheme } from '@emotion/react';
-import { Divider, Hidden, Typography } from '@mui/material';
+import { Divider, Hidden, Icon, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import UserImg from "../../assets/User.png";
 import {IconButton} from '@mui/material';
 import Delete from '@mui/icons-material/Delete';
 import ThumbUp from '@mui/icons-material/ThumbUp';
+import AddComment from '@mui/icons-material/AddComment';
 import Comment from '../Comment/Comment';
 import config from '../../config.json';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Collapse from '@mui/material/Collapse';
+import PostForm from '../PostForm/PostForm';
+import TreeView from '@mui/lab/TreeView';
+import PostsContainer from '../PostsContainer/PostsContainer';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import ChevronRight from '@mui/icons-material/ChevronRight';
 
 
 function Post(props){
@@ -22,6 +28,18 @@ function Post(props){
     const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
     
     const [postObj, setPostObj] = useState({});
+    const [showCommentForm,setShowCommentForm] = useState(false);
+
+    const postsContainerRef=useRef(undefined);
+    const handlePostAddition=(postObj)=>{
+        setPostObj((prevState)=>{
+            var newState = {...prevState};
+            newState.comments.push(postObj._id);
+            return newState;
+        });
+        postsContainerRef.current.addNewPost(postObj);
+    }
+
     useEffect(()=>{
         setPostObj(postobj);
     },[postobj]);
@@ -49,6 +67,20 @@ function Post(props){
         if(response.message=='success')
             handlepostdeletion(keyindex);
     }
+    const onShowCommentClick =()=>{
+        setShowCommentForm(!showCommentForm);
+    }
+    const populateComments=async()=>{
+        var returnResult;
+        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+postObj.postedBy._id+'/posts/'+postObj._id+'/comments');
+        response = await response.json();
+        if(response.message=='success')
+            return response.comments;
+        else{
+            console.error('failed to retrive comments');
+            return 'error'
+        }
+    }
 
     return (
     <Box  {...newProps} borderRadius='5px' sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),width:'100%',overflow:'hidden'}} >
@@ -73,19 +105,23 @@ function Post(props){
             <Typography fontSize="0.9rem" color='text.secondary'> <IconButton onClick={onLikeClick}> <ThumbUp sx={{
                 color:`${postObj.likes.includes(loggedInUser._id)?'primary.dark':''}`,width:'20px'
                 }}/></IconButton>
-                {postObj.likes.length} Like {postObj.comments.length} Comment
+                {postObj.likes.length} Likes {postObj.comments.length}  Comments
+                <IconButton onClick={onShowCommentClick}> <AddComment sx={{
+                color:`${showCommentForm?'primary.dark':''}`,width:'20px'
+                }}/> </IconButton>
             </Typography>
         </Box>
         <Box>
-            <Collapse in={false}>
-                <Typography> Hwllo from comment </Typography>
+            {/* Comment Form */}
+            <Collapse in={showCommentForm}>
+                <PostForm  parentpost={postObj._id} handlePostAddition={handlePostAddition}/>
             </Collapse>
         </Box>
         <Box sx={{backgroundColor:(theme.palette.mode=='light'?'grey.300':'grey.A700'),width:'100%',padding:'5px',boxSizing:'border-box'}} >
             {/* Comments */}
-            <Comment>
-
-            </Comment>
+            <TreeView defaultCollapseIcon={<ExpandMore/>} defaultExpandIcon={<ChevronRight/>}>
+                <PostsContainer isComments={true} populatePosts={populateComments} ref={postsContainerRef}/>
+            </TreeView>
         </Box>
     </Box>
     );

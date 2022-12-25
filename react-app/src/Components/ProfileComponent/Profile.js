@@ -229,7 +229,7 @@ function Profile(props){
             </div>
             <div id='big-div'>
                 {loggedInUser._id==personProfile._id && <PostForm handlePostAddition={handlePostAddition}/>}
-                <PostsContainer populatePosts={fetchData} ref={postsContainerRef}/>
+                <PostsContainer populatePosts={fetchData} ref={postsContainerRef} isComments={false}/>
             </div>
         </Box>
     );

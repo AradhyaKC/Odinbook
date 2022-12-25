@@ -1,23 +1,28 @@
 import { useTheme } from "@emotion/react";
-import { Button, Typography } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import Box from '@mui/material/Box';
 import './PostForm.css';
 import { TextareaAutosize } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import config from '../../config.json';
 
 function PostForm(props){
     const theme = useTheme();
     const [color,setColor]=useState('text.secondary');
-    const {handlePostAddition} = props;
+    const {handlePostAddition,parentpost,...newProps} = props;
     // const personProfile= JSON.parse(window.sessionStorage.getItem('user'));
 
     const onSubmitPost =async(e)=>{
         e.preventDefault();
         const user = JSON.parse(window.sessionStorage.getItem('user'));
-        var formData = new FormData(document.getElementById('post-form'));
+        // console.log('post-form-'+`${parentPost!=undefined?parentPost._id:''}`);
+        var formData = new FormData(document.getElementById('post-form-'+`${parentpost!=undefined?parentpost:''}`));
         formData.append('postedBy',user._id);
         formData.append('postedOn',new Date(Date.now()));
+        if(parentpost!=undefined){
+            formData.append('parentPost',parentpost);
+        }
+        console.log(formData);
         
         var formObj ={};
         for(const [key,value] of formData){
@@ -29,14 +34,25 @@ function PostForm(props){
         response = await response.json();
         if(response.message=='success'){
             // console.log(response.post);
-            handlePostAddition(response.post);
-        }
-            
+            handlePostAddition?.(response.post); // refactor needed here 
+        }    
     }
+
     const changeColor=(e)=>{
         setColor('text.primary');
     }
 
+
+    if(parentpost!=undefined){
+        return (
+            <Box>
+                <form id={'post-form-'+parentpost} style={{display:'flex',flexDirection:'row',padding:'0px 5px',paddingBottom:'5px'}}>
+                    <TextField sx={{flexGrow:1,}} name="description" id="description"/>
+                <Button onClick={onSubmitPost} style={{width:'min-content',height:'min-content',alignSelf:'center',marginLeft:'5px'}} variant='contained'>Comment</Button>
+                </form>
+            </Box>
+        );
+    }
     return (
         <Box style={{position:'relative'}}
         sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),overflow:'hidden',height:'100px',textAlign:'left', padding:'10px'}} borderRadius='5px'>
