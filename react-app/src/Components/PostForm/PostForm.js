@@ -16,7 +16,7 @@ function PostForm(props){
         e.preventDefault();
         const user = JSON.parse(window.sessionStorage.getItem('user'));
         // console.log('post-form-'+`${parentPost!=undefined?parentPost._id:''}`);
-        var formData = new FormData(document.getElementById('post-form-'+`${parentpost!=undefined?parentpost:''}`));
+        var formData = new FormData(document.getElementById('post-form'+`${parentpost!=undefined?'-'+parentpost:''}`));
         formData.append('postedBy',user._id);
         formData.append('postedOn',new Date(Date.now()));
         if(parentpost!=undefined){

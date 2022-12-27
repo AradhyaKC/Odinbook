@@ -80,7 +80,7 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
     response= await response.json();
     if(response.message=='success')
         handlepostdeletion(keyindex);
-}
+  }
 
   return (
   <Box  {...newProps} sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),borderRadius:'5px',
@@ -99,7 +99,7 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
         </div>
         <div style={{flexGrow:1,textAlign:'right',minWidth:'max-content'}}>
           <IconButton onClick={onShowCommentClick}> <AddComment sx={{color:`${showCommentForm?'primary.dark':''}`}}/> </IconButton>
-          {commentObj.postedBy._id==loggedInUser._id && <IconButton> <Delete sx={{color:'error.dark'}}/></IconButton>}
+          {commentObj.postedBy._id==loggedInUser._id && <IconButton onClick={onDeleteClick}> <Delete sx={{color:'error.dark'}}/></IconButton>}
         </div>
       </Box>
       
@@ -118,12 +118,15 @@ function CustomTreeItem(props) {
 }
 
 function Comment(props){
-    const {commentobj} =props;
+    const {commentobj,handlepostdeletion,...newProps} =props;
+    const propsObject ={...commentobj,handlepostdeletion};
 
     return (
-    <CustomTreeItem nodeId={commentobj._id} ContentProps={commentobj} label='something '>
-      {commentobj.comments.map((element,index)=>{ return <CustomTreeItem key={index} nodeId={element._id} ContentProps={element}/>})}
-    </CustomTreeItem>
+    <TreeItem nodeId={commentobj._id} ContentProps={propsObject} label='something ' ContentComponent={CustomContent} {...newProps}>
+      {commentobj.comments.map((element,index)=>{ 
+        return <TreeItem key={index} nodeId={element._id} ContentProps={element} ContentComponent={CustomContent} {...props}/>
+      })}
+    </TreeItem>
     );
 }
 

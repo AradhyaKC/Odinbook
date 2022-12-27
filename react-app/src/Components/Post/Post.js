@@ -81,6 +81,13 @@ function Post(props){
             return 'error'
         }
     }
+    const onDeletePost=(index)=>{
+        setPostObj((prevState)=>{
+            var newState = {...prevState};
+            newState.comments.splice(index,1);
+            return newState;
+        });
+    }
 
     return (
     <Box  {...newProps} borderRadius='5px' sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),width:'100%',overflow:'hidden'}} >
@@ -120,7 +127,7 @@ function Post(props){
         <Box sx={{backgroundColor:(theme.palette.mode=='light'?'grey.300':'grey.A700'),width:'100%',padding:'5px',boxSizing:'border-box'}} >
             {/* Comments */}
             <TreeView defaultCollapseIcon={<ExpandMore/>} defaultExpandIcon={<ChevronRight/>}>
-                <PostsContainer isComments={true} populatePosts={populateComments} ref={postsContainerRef}/>
+                <PostsContainer isComments={true} populatePosts={populateComments} onDeletePost={onDeletePost} ref={postsContainerRef}/>
             </TreeView>
         </Box>
     </Box>

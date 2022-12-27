@@ -89,18 +89,36 @@ router.put('/:postId/likes',(req,res)=>{
     });
 });
 
-router.delete('/:postId',(req,res)=>{
-    Post.findOne({_id:req.params.postId}).exec((err,thePost)=>{
-        if(err) return res.status(500).json({message:'error',error:err});
-        if(req.body.deletedBy == thePost.postedBy){
-            Post.deleteOne({_id:req.params.postId}).exec((err)=>{
-                return res.status(200).json({message:'success'});
-            });
-        }else{
-            return res.status(403).json({message:'error',error:'you don not have the permission to delete'});
+router.delete('/:postId',async(req,res)=>{
+    try{
+        var openList=[];
+        async function addToOpenListRecursively(postId){
+            var thisPost = await Post.findOne({_id:postId});
+
+            var promiseAll = await Promise.all(thisPost.comments.map(async (childCommentId)=>{
+                await addToOpenListRecursively(childCommentId);
+            }));
+            openList.push(thisPost._id);
         }
-    });
-    // Post.deleteOne({_id})
+
+        var post = await Post.findOne({_id:req.params.postId});
+        console.log(post);
+        if(post.parentPost!=undefined){
+            var parentPost =await Post.findOne({_id:post.parentPost});
+            let index =parentPost.comments.indexOf(req.params.postId);
+            parentPost.comments.splice(index,1);
+            parentPost.save();
+        }
+        await addToOpenListRecursively(req.params.postId);
+        var deleteAll = await Promise.all(openList.map(async(commentId)=>{
+            await Post.deleteOne({_id:commentId});
+        }));
+        
+        return res.status(200).json({message:'success'});
+    }catch(error){
+        console.error(error);
+        return res.status(500).json({message:'error',error:error});
+    }
 });
 
 router.get('/:postId/comments', async (req,res)=>{

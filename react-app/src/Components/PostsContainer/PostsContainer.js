@@ -9,8 +9,9 @@ import Comment from "../Comment/Comment.js";
 const PostsContainer = forwardRef((props,ref)=>{
     const [postsArray,setPostsArray] = useState(undefined);
     const newProps = {...props};
-    const {populatePosts,isComments} =newProps;
+    const {populatePosts,isComments,onDeletePost} =newProps;
     newProps.populatePosts=undefined;
+    newProps.onDeletePost=undefined;
 
 
     useImperativeHandle(ref,()=>{
@@ -37,6 +38,8 @@ const PostsContainer = forwardRef((props,ref)=>{
             newState.splice(index,1);
             return newState;
         });
+        if(onDeletePost!=undefined)
+            onDeletePost(index);
     } 
     return (
         <Box >
