@@ -102,7 +102,7 @@ router.delete('/:postId',async(req,res)=>{
         }
 
         var post = await Post.findOne({_id:req.params.postId});
-        console.log(post);
+        // console.log(post);
         if(post.parentPost!=undefined){
             var parentPost =await Post.findOne({_id:post.parentPost});
             let index =parentPost.comments.indexOf(req.params.postId);
@@ -113,7 +113,7 @@ router.delete('/:postId',async(req,res)=>{
         var deleteAll = await Promise.all(openList.map(async(commentId)=>{
             await Post.deleteOne({_id:commentId});
         }));
-        
+
         return res.status(200).json({message:'success'});
     }catch(error){
         console.error(error);

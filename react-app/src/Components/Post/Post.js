@@ -102,7 +102,7 @@ function Post(props){
                 <IconButton onClick={onDeleteClick} > <Delete sx={{color:'error.dark'}} /> </IconButton>
             </div>}
         </Box>
-        <Divider/>
+        {/* <Divider/> */}
         <div style={{textOverflow:'wrap'}}>
             <Typography color='text.primary' sx={{textAlign:'left',padding:'7px',paddingLeft:'15px'}}>{postObj.description}</Typography>
         </div>

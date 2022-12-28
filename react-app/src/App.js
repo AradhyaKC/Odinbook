@@ -13,7 +13,8 @@ function App() {
     palette: {
       mode:'dark',
       grey:{
-        '800':'#333333'
+        '800':'#333333',
+        'A700':'#121212'
       }
       // primary: {
         //   main:'#272727',

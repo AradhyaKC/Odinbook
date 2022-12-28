@@ -1,8 +1,8 @@
 import { useTheme } from "@emotion/react";
-import { Collapse, Divider, IconButton, Typography } from "@mui/material";
+import { Collapse, Divider, Icon, IconButton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import UserImg from "../../assets/User.png";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import Delete from "@mui/icons-material/Delete";
 import AddComment from '@mui/icons-material/AddComment';
 import config from '../../config.json';
@@ -14,6 +14,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import TreeItem, { useTreeItem } from '@mui/lab/TreeItem';
 import clsx from 'clsx';
 import PostForm from "../PostForm/PostForm";
+import { cloneElement } from "react";
 
 const CustomContent = forwardRef(function CustomContent(props, ref) {
   const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
@@ -24,6 +25,7 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
     const {_id,description,postedOn,postedBy,comments,parentPost,}=props;
     return {_id,description,postedOn,postedBy,comments,parentPost};
   });
+  const [isCommentsExpanded,setIsCommentsExpanded] = useState(true);
   // const customContentRef= useImperativeHandle(ref,)
 
   useEffect(()=>{
@@ -61,8 +63,10 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
     preventSelection(event);
   };
 
-  const handleExpansionClick = (event) => {
+  const handleExpansionClick = async(event) => {
     handleExpansion(event);
+    await setIsCommentsExpanded(!isCommentsExpanded);
+    // console.log(isCommentsExpanded)
   };
 
   const handleSelectionClick = (event) => {
@@ -88,9 +92,9 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
     { (commentObj!=undefined && Object.keys(commentObj).length!=0) && <>
       {/* {console.log(commentObj)} */}
       <Box sx={{display:'flex',flexDirection:'row',width:'stretch'}}>
-        {commentObj.comments.length!=0 && <div style={{alignSelf:'center',marginLeft:'5px'}} onClick={handleExpansionClick} className={classes.iconContainer}>
-          {icon}
-        </div>}
+        {commentObj.comments.length!=0 && <Box sx={{color:'text.main',alignSelf:'center',marginLeft:'5px'}} onClick={handleExpansionClick} className={classes.iconContainer}>
+          <IconButton>{!isCommentsExpanded?<ExpandMore style={{color:'text.main'}}/>:<ChevronRight style={{color:'text.main'}}/>}</IconButton>
+        </Box>}
         <img src={config.EXPRESS_APP_BASE_URL+'/users/'+commentObj.postedBy._id+'/profileImage'} style={{width:'22px',height:'22px',alignSelf:'center',marginLeft:'5px',marginRight:'3px'}}/>
         <div>
           <Typography color='text.primary' fontSize='0.8rem' sx={{alignSelf:'center',marginRight:'3px',textAlign:'left'}}>{commentObj.postedBy.first_name+' '} 
@@ -113,10 +117,6 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
   );
 });
 
-function CustomTreeItem(props) {
-  return <TreeItem ContentComponent={CustomContent} {...props} />;
-}
-
 function Comment(props){
     const {commentobj,handlepostdeletion,...newProps} =props;
     const propsObject ={...commentobj,handlepostdeletion};
@@ -124,7 +124,7 @@ function Comment(props){
     return (
     <TreeItem nodeId={commentobj._id} ContentProps={propsObject} label='something ' ContentComponent={CustomContent} {...newProps}>
       {commentobj.comments.map((element,index)=>{ 
-        return <TreeItem key={index} nodeId={element._id} ContentProps={element} ContentComponent={CustomContent} {...props}/>
+        return <Comment key={index} commentobj={element} handlepostdeletion={handlepostdeletion}/>
       })}
     </TreeItem>
     );
