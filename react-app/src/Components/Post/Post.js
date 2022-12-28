@@ -126,7 +126,8 @@ function Post(props){
         </Box>
         <Box sx={{backgroundColor:(theme.palette.mode=='light'?'grey.300':'grey.A700'),width:'100%',padding:'5px',boxSizing:'border-box'}} >
             {/* Comments */}
-            <TreeView defaultCollapseIcon={<ExpandMore/>} defaultExpandIcon={<ChevronRight/>}>
+            <TreeView defaultCollapseIcon={<IconButton sx={{color:'text.main'}}><ExpandMore/></IconButton>}
+            defaultExpandIcon={<IconButton sx={{color:'text.main'}}><ChevronRight/></IconButton>}>
                 <PostsContainer isComments={true} populatePosts={populateComments} onDeletePost={onDeletePost} ref={postsContainerRef}/>
             </TreeView>
         </Box>

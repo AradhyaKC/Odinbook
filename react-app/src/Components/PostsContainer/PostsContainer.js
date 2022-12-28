@@ -7,30 +7,49 @@ import Comment from "../Comment/Comment.js";
 
 
 const PostsContainer = forwardRef((props,ref)=>{
-    const [postsArray,setPostsArray] = useState(undefined);
     const newProps = {...props};
     const {populatePosts,isComments,onDeletePost} =newProps;
     newProps.populatePosts=undefined;
     newProps.onDeletePost=undefined;
+    // const [postsArray,setPostsArray] = useState(()=>{
+    //     (async()=>{
+    //         var newPosts = await populatePosts();
+    //         setPostsArray(newPosts);
+    //     })();
+    //     return [];
+    //     // populatePosts.then((value)=>{setPostsArray(value)});
+    //     // console.log(populatePosts);
+    // });
+    const [postsArray,setPostsArray] = useState(()=>{console.log('postContaniner was ccreated '); return [];})
 
+    useEffect(()=>{
+        (async()=>{
+            var newPosts = await populatePosts();
+            setPostsArray(newPosts);
+        })();
+    },[]);
 
-    useImperativeHandle(ref,()=>{
-        var thisRef ={};
-        thisRef.addNewPost=(postObj)=>{
+    // useImperativeHandle(ref,()=>{
+    //     var thisRef ={};
+    //     thisRef.addNewPost=(postObj)=>{
+    //         setPostsArray((prevState)=>{
+    //             var newState = [...prevState];
+    //             newState.push(postObj);
+    //             return newState;
+    //         });
+    //     }
+    //     return thisRef;
+    // });
+    useImperativeHandle(ref,()=>({
+        addNewPost:(postObj)=>{
             setPostsArray((prevState)=>{
                 var newState = [...prevState];
                 newState.push(postObj);
                 return newState;
             });
         }
-        return thisRef;
-    });
-
-    useEffect(()=>{
-        (async()=>{
-            await setPostsArray(await populatePosts());
-        })();
-    },[]);
+    }
+    ));
 
     const handlePostDeletion=(index)=>{
         setPostsArray((prevState)=>{

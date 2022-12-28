@@ -2,7 +2,7 @@ import { useTheme } from "@emotion/react";
 import { Collapse, Divider, Icon, IconButton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import UserImg from "../../assets/User.png";
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Delete from "@mui/icons-material/Delete";
 import AddComment from '@mui/icons-material/AddComment';
 import config from '../../config.json';
@@ -12,6 +12,7 @@ import TreeView from '@mui/lab/TreeView';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import TreeItem, { useTreeItem } from '@mui/lab/TreeItem';
+import PostsContainer from "../PostsContainer/PostsContainer";
 import clsx from 'clsx';
 import PostForm from "../PostForm/PostForm";
 import { cloneElement } from "react";
@@ -21,12 +22,23 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
   const theme = useTheme();
   const [showCommentForm,setShowCommentForm] = useState(false);
   // const {commentobj} = props;
-  const [commentObj,setCommentObj] =useState(()=>{
-    const {_id,description,postedOn,postedBy,comments,parentPost,}=props;
-    return {_id,description,postedOn,postedBy,comments,parentPost};
-  });
-  const [isCommentsExpanded,setIsCommentsExpanded] = useState(true);
-  // const customContentRef= useImperativeHandle(ref,)
+  // const [commentObj,setCommentObj] =useState(()=>{
+  //   const {_id,description,postedOn,postedBy,comments,parentPost,}=props;
+  //   return {_id,description,postedOn,postedBy,comments,parentPost};
+  // });
+  // const buttonRef = useRef(undefined);
+  // const customContentRef= useImperativeHandle(ref,()=>{
+  //   var returnRef={};
+  //   returnRef.commentDeletedOn=(index)=>{
+  //     setCommentObj((prevState)=>{
+  //       var newState ={...prevState};
+  //       newState.comments.splice(index,1);
+  //       return newState;
+  //     });
+  //     return returnRef;
+  //   }
+  //   returnRef.current={...buttonRef.current}
+  // });
 
   useEffect(()=>{
     // const {_id,description,postedOn,postedBy,comments,parentPost}=props;
@@ -57,6 +69,11 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
   } = useTreeItem(nodeId);
 
 
+  // useEffect(()=>{
+  //   if(props.comments.length==0)
+  //     setIsCommentsExpanded(false);
+  // },[]);
+
   const icon = iconProp || expansionIcon || displayIcon;
 
   const handleMouseDown = (event) => {
@@ -65,8 +82,6 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
 
   const handleExpansionClick = async(event) => {
     handleExpansion(event);
-    await setIsCommentsExpanded(!isCommentsExpanded);
-    // console.log(isCommentsExpanded)
   };
 
   const handleSelectionClick = (event) => {
@@ -78,7 +93,7 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
   }
   const onDeleteClick=async(e)=>{
     e.preventDefault();
-    var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+commentObj.postedBy._id+'/posts/'+commentObj._id,{
+    var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+props.postedBy._id+'/posts/'+props._id,{
         method:'DELETE',mode:'cors',body:JSON.stringify({deletedBy:loggedInUser._id}),headers:{'content-type':'application/json'}
     })
     response= await response.json();
@@ -89,43 +104,70 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
   return (
   <Box  {...newProps} sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),borderRadius:'5px',
   display:'flex',flexDirection:'column',width:'-moz-available',marginTop:'5px'}} onMouseDown={handleMouseDown} ref={ref} style={{padding:'0px'}}>
-    { (commentObj!=undefined && Object.keys(commentObj).length!=0) && <>
+    { (props._id!=undefined) && <>
       {/* {console.log(commentObj)} */}
       <Box sx={{display:'flex',flexDirection:'row',width:'stretch'}}>
-        {commentObj.comments.length!=0 && <Box sx={{color:'text.main',alignSelf:'center',marginLeft:'5px'}} onClick={handleExpansionClick} className={classes.iconContainer}>
-          <IconButton>{!isCommentsExpanded?<ExpandMore style={{color:'text.main'}}/>:<ChevronRight style={{color:'text.main'}}/>}</IconButton>
+        {props.comments.length!=0 && <Box sx={{color:'text.main',alignSelf:'center',marginLeft:'5px'}} onClick={handleExpansionClick} className={classes.iconContainer}>
+          {icon}
         </Box>}
-        <img src={config.EXPRESS_APP_BASE_URL+'/users/'+commentObj.postedBy._id+'/profileImage'} style={{width:'22px',height:'22px',alignSelf:'center',marginLeft:'5px',marginRight:'3px'}}/>
+        <img src={config.EXPRESS_APP_BASE_URL+'/users/'+props.postedBy._id+'/profileImage'} style={{width:'22px',height:'22px',alignSelf:'center',marginLeft:'5px',marginRight:'3px'}}/>
         <div>
-          <Typography color='text.primary' fontSize='0.8rem' sx={{alignSelf:'center',marginRight:'3px',textAlign:'left'}}>{commentObj.postedBy.first_name+' '} 
-          {commentObj.postedBy.last_name}</Typography>
-          <Typography color='text.secondary' fontSize='0.8rem' sx={{alignSelf:'center'}}> Commented on {commentObj.postedOn.slice(0,16)}</Typography>
+          <Typography color='text.primary' fontSize='0.8rem' sx={{alignSelf:'center',marginRight:'3px',textAlign:'left'}}>{props.postedBy.first_name+' '} 
+          {props.postedBy.last_name}</Typography>
+          <Typography color='text.secondary' fontSize='0.8rem' sx={{alignSelf:'center'}}> Commented on {props.postedOn.slice(0,16)}</Typography>
         </div>
         <div style={{flexGrow:1,textAlign:'right',minWidth:'max-content'}}>
           <IconButton onClick={onShowCommentClick}> <AddComment sx={{color:`${showCommentForm?'primary.dark':''}`}}/> </IconButton>
-          {commentObj.postedBy._id==loggedInUser._id && <IconButton onClick={onDeleteClick}> <Delete sx={{color:'error.dark'}}/></IconButton>}
+          {props.postedBy._id==loggedInUser._id && <IconButton onClick={onDeleteClick}> <Delete sx={{color:'error.dark'}}/></IconButton>}
         </div>
       </Box>
       
       <Divider style={{width:'100%'}} variant="middle"/>
-      <Typography mt='2px' ml='5px' color='text.primary' sx={{textAlign:'left',alignSelf:'flex-start'}}>{commentObj.description}</Typography>
+      <Typography mt='2px' ml='5px' color='text.primary' sx={{textAlign:'left',alignSelf:'flex-start'}}>{props.description}</Typography>
       <Collapse in={showCommentForm}>
-        <PostForm parentpost={commentObj._id}/>
+        <PostForm parentpost={props._id} handlePostAddition={props.handlePostAddition}/>
       </Collapse>
     </>}  
   </Box>
   );
 });
 
-function Comment(props){
-    const {commentobj,handlepostdeletion,...newProps} =props;
-    const propsObject ={...commentobj,handlepostdeletion};
 
+function Comment(props){
+    const postsContainerRef = useRef();
+    const {commentobj,handlepostdeletion,...newProps} =props;
+    const [commentObj,setCommentObj]=useState(commentobj);
+
+    const populateComments =async()=>{
+      return commentObj.comments;
+    }
+    const onDeletePost=(index)=>{
+      setCommentObj((prevState)=>{
+        var newState = {...prevState};
+        newState.comments.splice(index,1);
+        return newState;
+      });
+    }
+    const handlePostAddition=async(postObj)=>{
+      await setCommentObj((prevState)=>{
+          var newState = {...prevState};
+          newState.comments.push(postObj._id);
+          console.log('called');
+          return newState;
+      });
+      // setTimeout(()=>{
+      //   postsContainerRef.current.addNewPost(postObj);
+      // },1000);
+    }
+    const propsObject ={...commentObj,handlepostdeletion,handlePostAddition};
+
+    useEffect(()=>{
+    console.log(postsContainerRef);
+    },[])
+    var stringId = commentObj._id;
     return (
-    <TreeItem nodeId={commentobj._id} ContentProps={propsObject} label='something ' ContentComponent={CustomContent} {...newProps}>
-      {commentobj.comments.map((element,index)=>{ 
-        return <Comment key={index} commentobj={element} handlepostdeletion={handlepostdeletion}/>
-      })}
+    <TreeItem nodeId={stringId} ContentProps={propsObject} label='something ' ContentComponent={CustomContent}>
+      <PostsContainer isComments={true} populatePosts={populateComments}  onDeletePost={onDeletePost} ref={postsContainerRef}/>
     </TreeItem>
     );
 }
