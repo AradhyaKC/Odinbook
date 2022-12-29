@@ -97,8 +97,10 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
         method:'DELETE',mode:'cors',body:JSON.stringify({deletedBy:loggedInUser._id}),headers:{'content-type':'application/json'}
     })
     response= await response.json();
-    if(response.message=='success')
-        handlepostdeletion(keyindex);
+    if(response.message=='success'){
+      // console.log(props.keyindex);
+      handlepostdeletion(props.keyindex);
+    }
   }
 
   return (
@@ -114,7 +116,7 @@ const CustomContent = forwardRef(function CustomContent(props, ref) {
         <div>
           <Typography color='text.primary' fontSize='0.8rem' sx={{alignSelf:'center',marginRight:'3px',textAlign:'left'}}>{props.postedBy.first_name+' '} 
           {props.postedBy.last_name}</Typography>
-          <Typography color='text.secondary' fontSize='0.8rem' sx={{alignSelf:'center'}}> Commented on {props.postedOn.slice(0,16)}</Typography>
+          <Typography color='text.secondary' fontSize='0.8rem' sx={{alignSelf:'center'}}> Commented on {props.postedOn.slice(0,16)} </Typography>
         </div>
         <div style={{flexGrow:1,textAlign:'right',minWidth:'max-content'}}>
           <IconButton onClick={onShowCommentClick}> <AddComment sx={{color:`${showCommentForm?'primary.dark':''}`}}/> </IconButton>
@@ -137,37 +139,36 @@ function Comment(props){
     const postsContainerRef = useRef();
     const {commentobj,handlepostdeletion,...newProps} =props;
     const [commentObj,setCommentObj]=useState(commentobj);
+    
+    useEffect(()=>{
+      setCommentObj(props.commentobj);
+    },[props.commentobj])
 
-    const populateComments =async()=>{
-      return commentObj.comments;
-    }
     const onDeletePost=(index)=>{
       setCommentObj((prevState)=>{
         var newState = {...prevState};
+        // console.log(index);
         newState.comments.splice(index,1);
+        // console.log(newState.comments);
         return newState;
       });
     }
-    const handlePostAddition=async(postObj)=>{
-      await setCommentObj((prevState)=>{
+    const handlePostAddition=(postObj)=>{
+      setCommentObj((prevState)=>{
           var newState = {...prevState};
-          newState.comments.push(postObj._id);
-          console.log('called');
+          newState.comments.push(postObj);
+          // console.log(newState.comments);
           return newState;
       });
-      // setTimeout(()=>{
-      //   postsContainerRef.current.addNewPost(postObj);
-      // },1000);
     }
-    const propsObject ={...commentObj,handlepostdeletion,handlePostAddition};
+    const propsObject ={...commentObj,handlepostdeletion,handlePostAddition,keyindex:props.keyindex};
 
-    useEffect(()=>{
-    console.log(postsContainerRef);
-    },[])
     var stringId = commentObj._id;
     return (
     <TreeItem nodeId={stringId} ContentProps={propsObject} label='something ' ContentComponent={CustomContent}>
-      <PostsContainer isComments={true} populatePosts={populateComments}  onDeletePost={onDeletePost} ref={postsContainerRef}/>
+      {commentObj.comments.map((element,index)=>{
+        return <Comment keyindex={index} key={index} commentobj={element} handlepostdeletion={onDeletePost}/>
+      })}
     </TreeItem>
     );
 }
