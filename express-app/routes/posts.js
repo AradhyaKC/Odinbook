@@ -92,6 +92,10 @@ router.put('/:postId/likes',(req,res)=>{
 router.delete('/:postId',async(req,res)=>{
     try{
         var openList=[];
+        var post = await Post.findOne({_id:req.params.postId});
+        if(post.postedBy._id!=req.body.deletedBy){
+            return res.status(403).json({message:'error',error:'the delete can only be made by the poster'});
+        }
         async function addToOpenListRecursively(postId){
             var thisPost = await Post.findOne({_id:postId});
 
@@ -100,8 +104,6 @@ router.delete('/:postId',async(req,res)=>{
             }));
             openList.push(thisPost._id);
         }
-
-        var post = await Post.findOne({_id:req.params.postId});
         // console.log(post);
         if(post.parentPost!=undefined){
             var parentPost =await Post.findOne({_id:post.parentPost});

@@ -12,7 +12,6 @@ import Dialog from '@mui/material/Dialog';
 import { useEffect, useRef, useState } from 'react';
 import config from '../../config.json';
 import PostsContainer from '../PostsContainer/PostsContainer';
-
 //new user fields : description , joinDate , birthDate? , FriendList , PostList ,friendreqList,commentList?, profilePicUrl?
 
 function Profile(props){

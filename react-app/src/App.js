@@ -6,6 +6,7 @@ import Navbar from './Components/NavbarComponent/Navbar.js';
 import { ThemeProvider, createTheme,Button} from '@mui/material';
 import Profile from './Components/ProfileComponent/Profile.js';
 import Box from '@mui/material/Box';
+import HomeComponent from './Components/HomeComponent/HomeComponent';
 
 function App() {
   
@@ -55,6 +56,7 @@ function App() {
               <Route path='/' element={ <TempIndexComponent/>}/>
               <Route path='/LogIn' element={<SignInForm/>}/>
               <Route path='/Profile' element={<Profile/>}/>
+              <Route path='/Home' element={<HomeComponent/>}/>
             </Routes>
           </Box>
         </BrowserRouter>

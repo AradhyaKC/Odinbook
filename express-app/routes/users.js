@@ -12,8 +12,15 @@ const path = require('path');
 const postsRouter = require('./posts');
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+router.get('/', async function(req, res, next) {
+  try{
+    randomnUsers = await User.find({},{password:0,profilePicUrl:0}).limit(10);
+    // console.log(randomnUsers);
+    return res.status(200).json({message:'success',users:randomnUsers});
+  }catch(err){
+    console.error(err);
+    return res.status(500).json({message:'error',error:err});
+  }
 });
 
 router.post('/',[
@@ -53,7 +60,8 @@ router.post('/',[
       let joinDate=new Date(Date.now());
       joinDate=joinDate.toDateString();
       joinDate=joinDate.slice(0,16);
-      var newUser= new User({first_name,last_name,email,password,joinDate});
+      let description = 'Hello , I am using OdinBook , lorem ipsum detour something ';
+      var newUser= new User({first_name,last_name,email,password,joinDate,description});
       newUser.save((err)=>{
         if(err) return next(err);
       });
