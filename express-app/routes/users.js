@@ -14,9 +14,42 @@ const postsRouter = require('./posts');
 /* GET users listing. */
 router.get('/', async function(req, res, next) {
   try{
-    randomnUsers = await User.find({},{password:0,profilePicUrl:0}).limit(10);
+    var randomnUsers = await User.find({},{password:0,profilePicUrl:0}).limit(10);
     // console.log(randomnUsers);
     return res.status(200).json({message:'success',users:randomnUsers});
+  }catch(err){
+    console.error(err);
+    return res.status(500).json({message:'error',error:err});
+  }
+});
+router.get('/search/:searchQuery',
+async(req,res)=>{
+  try{
+    req.params.searchQuery = req.params.searchQuery.trimStart().trimEnd().escape();
+    console.log('value of seacrhQ is ' +req.params.searchQuery);
+    if( req.params.searchQuery==undefined || req.params.searchQuery==undefined) throw 'seacrhQuesry was not assign a value';
+    
+    var terms = req.params.searchQuery.split(' ');
+    let seacrhQ1=terms[0];
+    let seacrhQ2=undefined;
+    if(terms.length>1) seacrhQ2=terms[1];
+
+    var orRegex ={
+      '$or':[
+        {'first_name':{'$regex':'^'+seacrhQ1,$options:"$i"}},{'last_name':{'$regex':'^'+seacrhQ1,$options:"$i"}},
+        ...(()=>{
+          if(seacrhQ2!=undefined){
+            return [{'first_name':{'$regex':'^'+seacrhQ2,$options:"$i"}},{'last_name':{'$regex':'^'+seacrhQ2,$options:"$i"}}];
+          }else{
+            return [];
+          }
+        })(),
+      ]
+    };
+
+    var randomUsers = await User.find(orRegex,{password:0,profilePicUrl:0}).limit(10);
+
+    return res.status(200).json({message:'success',users:randomUsers});
   }catch(err){
     console.error(err);
     return res.status(500).json({message:'error',error:err});
@@ -204,7 +237,25 @@ router.get('/:userId/profileImage',(req,res)=>{
       return res.sendFile(path.join(__dirname ,'../User.png'));
     }
   });
-})
+});
+
+router.put('/:userId/friendRequests',async(req,res)=>{
+  try{
+    var user = await User.find({_id:req.params.userId});
+    user=user[0];
+    console.log(user);
+    if(user.friendRequests.includes(req.body.requestedBy))
+      throw 'you have already sent a friend request to this person';
+    else{
+      user.friendRequests.push(req.body.requestedBy);
+    }
+    await user.save();
+    return res.status(200).json({message:'success',friendRequests:user.friendRequests});  
+  }catch(err){
+    console.log(err);
+    return res.status(200).json({message:'error',error:err});  
+  }
+});
 
 // router.use('/:userId/posts',postsRouter);
 // router.post('/:userId/posts/',

@@ -15,16 +15,64 @@ function FindFriendsComponent(props){
 
     const theme = useTheme();
     const [FriendList,setFriendList] = useState(undefined);
+    const [searchValue,setSearchValue]=useState('');
+    const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
 
     useEffect(()=>{
         (async()=>{
             var response=await fetch(config.EXPRESS_APP_BASE_URL+'/users/');
             response = await response.json();
             // console.log('called');
-            if(response.message=='success')
-                setFriendList(response.users);
+            if(response.message=='success'){
+                var filteredUsers=response.users.filter((userElement)=>{
+                    if(userElement._id==loggedInUser._id) return false;
+                    return !userElement.friendRequests.includes(loggedInUser._id); // also add not friedns later;
+                });
+                setFriendList(filteredUsers);
+            }
         })();
     },[]);
+
+    const AddFriend=async(friendId)=>{
+        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+friendId+'/friendRequests',{
+            method:'PUT', body:JSON.stringify({requestedBy:loggedInUser._id}),headers:{'content-type':'application/json'},mode:'cors',
+        });
+        response= await response.json();
+        if(response.message=='success'){
+            setFriendList((prevState)=>{
+                console.assert(FriendList!=undefined && FriendList.length!=0);
+                let index= FriendList.findIndex((element)=>{
+                    return element._id==friendId;
+                });
+                console.assert(index!=-1);
+                var newState = [...prevState];
+                newState.splice(index,1);
+                return newState;
+            });
+        }
+    }
+
+    const handleSearchValueChange =async(e)=>{
+        e.preventDefault();
+        await setSearchValue(e.target.value);
+        // console.log('teh search value is'+searchValue+' ,e.target.laue =' +e.target.value);
+        var response;
+        if(e.target.value=='' || e.target.value==undefined){
+        response=await fetch(config.EXPRESS_APP_BASE_URL+'/users/');
+        }else{
+            response=await fetch(config.EXPRESS_APP_BASE_URL+'/users/search/'+e.target.value);
+        }
+        response = await response.json();
+
+        if(response.message=='success'){
+            var filteredUsers=response.users.filter((userElement)=>{
+                if(userElement._id==loggedInUser._id) return false;
+                return !userElement.friendRequests.includes(loggedInUser._id); // also add not friedns later;
+            });
+            // console.log(filteredUsers);
+            setFriendList(filteredUsers);
+        }
+    }
 
     return(
     <Box sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),padding:'10px',borderRadius:'5px'}} {...props}>
@@ -32,7 +80,7 @@ function FindFriendsComponent(props){
             <Typography fontSize='1.4rem' color='text.primary' sx={{justifySelf:'flex-start',width:'max-content'}} > Find Friends </Typography>
             <TextField InputProps={{
                 startAdornment: <InputAdornment position="start"><Search/></InputAdornment>,
-            }} sx={{justifySelf:'flex-end',width:'0px',flexGrow:1,maxWidth:'250px',marginLeft:'20px'}} size='small'/>
+            }} sx={{justifySelf:'flex-end',width:'0px',flexGrow:1,maxWidth:'250px',marginLeft:'20px'}} value={searchValue} onChange={handleSearchValueChange} size='small'/>
         </Box>
         
         <Box style={{overflow: 'auto',whiteSpace: 'nowrap',padding:'10px',position:'relative',minHeight:'75px'}}>
@@ -49,12 +97,13 @@ function FindFriendsComponent(props){
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button style={{position:'relative',textAlign:'center',left:'50%',transform:'translate(-50%,0%)',width:'max-content'}}>Add Friend</Button>
+                            <Button onClick={(e)=>{e.preventDefault();AddFriend(element._id);}}
+                            style={{position:'relative',textAlign:'center',left:'50%',transform:'translate(-50%,0%)',width:'max-content'}}>Add Friend</Button>
                         </CardActions>
                     </Card> 
                 })}
-                
             </Box>}
+            {FriendList!=undefined && FriendList.length==0 && <Typography color='text.secondary'> There are no users to friend at the moment </Typography>}
         </Box>
         
 

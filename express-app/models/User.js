@@ -15,7 +15,9 @@ const UserSchema =new Schema({
         data:Buffer,
         contentType:String
     },
+    friendRequests:[{type:mongoose.SchemaTypes.ObjectId, ref:'User',required:'false',default:[]}]
 });
+
 UserSchema.plugin(findOrCreate);
 
 module.exports = mongoose.model('User',UserSchema);
