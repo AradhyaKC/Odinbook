@@ -103,7 +103,7 @@ function SignInForm(props){
             }
             window.sessionStorage.setItem('user',JSON.stringify(response.user));
             setLoginState({errors:[]});
-            navigate('/Profile');
+            navigate('/Home');
         }
     }
     const responseSuccessGoogle=async(response)=>{

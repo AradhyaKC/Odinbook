@@ -9,6 +9,7 @@ import CardContent from '@mui/material/CardContent';
 import UserImg from '../../assets/User.png';
 import './FindFriendsComponent.css';
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import config from '../../config.json';
 
 function FindFriendsComponent(props){
@@ -17,6 +18,8 @@ function FindFriendsComponent(props){
     const [FriendList,setFriendList] = useState(undefined);
     const [searchValue,setSearchValue]=useState('');
     const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
+    var navigate = useNavigate();
+    
 
     useEffect(()=>{
         (async()=>{
@@ -73,6 +76,10 @@ function FindFriendsComponent(props){
             setFriendList(filteredUsers);
         }
     }
+    // const ProfileRedirect = (e)=>{
+    //     e.preventDefault();
+    //     navigate('/Profile');
+    // }
 
     return(
     <Box sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),padding:'10px',borderRadius:'5px'}} {...props}>
@@ -90,7 +97,9 @@ function FindFriendsComponent(props){
                     return <Card className="card" key={index}>
                         <CardContent>
                             <img className='card-img' src={config.EXPRESS_APP_BASE_URL+'/users/'+element._id+'/profileImage'}/>
-                            <Typography className="person-name" color='text.primary'>{element.first_name +' '+element.last_name}</Typography>
+                            <Link to={{pathname:'/Profile/'+element._id}}>
+                                <Typography className="person-name" color='text.primary'>{element.first_name +' '+element.last_name}</Typography>
+                            </Link>
                             <Typography className='at-addr' color="text.secondary">@{element.first_name} </Typography>
                             <Typography className="description" fontSize='0.7rem' color="text.secondary">
                                 {element.description}

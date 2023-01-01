@@ -13,6 +13,9 @@
 #odinbook-img{
     width: 125px;
 }
+#odinbook-img:hover{
+    cursor: pointer;
+}
 #user-img{
     border-radius: 50%;
     width: 35px;
@@ -21,6 +24,10 @@
 #username{
     margin-left: 4px;
     text-align: center ;
+}
+#username:hover{
+    text-decoration: underline white;
+    cursor: pointer;
 }
 #buttons{
     padding-right: 7%;

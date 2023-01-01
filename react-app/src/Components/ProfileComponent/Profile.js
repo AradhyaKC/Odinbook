@@ -9,7 +9,8 @@ import Check from '@mui/icons-material/Check';
 import Close from '@mui/icons-material/Close';
 import Edit from '@mui/icons-material/Edit';
 import Dialog from '@mui/material/Dialog';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
+import { useParams,useLocation} from 'react-router-dom';
 import config from '../../config.json';
 import PostsContainer from '../PostsContainer/PostsContainer';
 //new user fields : description , joinDate , birthDate? , FriendList , PostList ,friendreqList,commentList?, profilePicUrl?
@@ -17,12 +18,23 @@ import PostsContainer from '../PostsContainer/PostsContainer';
 function Profile(props){
 
     const [editIsOpen,setEditIsOpen] = useState(false);
+    const {personId} = useParams();
+    // const [personId,setPersonId] = useState(()=>{});
 
     var theme = useTheme();
     const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
-    const personProfile=JSON.parse(window.sessionStorage.getItem('user'));//needs to swapped with the profile of requested person;
+    const [personProfile,setPersonProfile]=useState(JSON.parse(window.sessionStorage.getItem('user')));
 
-    const [personProfilePosts,setPersonProfilePosts] = useState(undefined);
+
+    useEffect(()=>{
+        (async()=>{
+            var response = await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+personId);
+            response = await response.json();
+            if(response.message=='success'){
+                setPersonProfile(response.user);
+            }
+        })();
+    },[]);
 
     // const tempPersonProfile=JSON.parse(window.sessionStorage.getItem('user'));// swap it with profile of person
     // var personProfile = {...tempPersonProfile};  
@@ -123,6 +135,16 @@ function Profile(props){
         // return Promise.resolve(returnResult);
         return returnResult;
     }
+
+    // const AddFriend=async(friendId)=>{
+    //     var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+friendId+'/friendRequests',{
+    //         method:'PUT', body:JSON.stringify({requestedBy:loggedInUser._id}),headers:{'content-type':'application/json'},mode:'cors',
+    //     });
+    //     response= await response.json();
+    //     if(response.message=='success'){
+            
+    //     }
+    // }
 
     return (
         <Box id='profile-flex' >

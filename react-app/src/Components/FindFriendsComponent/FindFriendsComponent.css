@@ -10,6 +10,10 @@
     font-size:1.2rem;
     font-weight:400;
 }
+.person-name:hover{
+    text-decoration: underline rgb(0, 0, 0);
+    cursor: pointer;
+}
 .description{
     white-space: normal;
 }

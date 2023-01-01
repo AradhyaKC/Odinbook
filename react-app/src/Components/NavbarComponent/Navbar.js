@@ -10,7 +10,7 @@ import { cloneElement } from "react";
 import Brightness4 from '@mui/icons-material/Brightness4';
 import Brightness7 from '@mui/icons-material/Brightness7';
 import Logout from '@mui/icons-material/Logout';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 function ElevationScroll(props){
@@ -45,11 +45,18 @@ function Navbar(props){
         <AppBar color='primary'>
             <div className="flex-container">
                 <div style={{flexGrow:'1',textAlign:'left',paddingLeft:'7%',verticalAlign:'center'}}>
-                    <img id='odinbook-img' src={OdinbookImg}/>
+                    {
+                        (user!=null &&user!=undefined && Object.keys(user).length!=0) && <Link to={{pathname:'/Home'}}>
+                            <img id='odinbook-img' src={OdinbookImg}/>
+                        </Link>
+                    }
+                    {user==undefined &&  <img id='odinbook-img' src={OdinbookImg}/>}
                 </div>
                 {(user!=null &&user!=undefined && Object.keys(user).length!=0) && <div id='buttons'>
                     <img  id='user-img' src={(user.profilePicUrl==undefined)?UserImg:user.profilePicUrl}/> 
-                    <div id='username' style={{color:'white'}}> {user.first_name} </div>
+                    <Link to={{pathname:'/Profile/'+user._id}}>
+                        <div id='username' style={{color:'white'}}> {user.first_name} </div>
+                    </Link>
                     <IconButton onClick={onToggleTheme} color='inherit'>
                         {state.theme=='dark'?<Brightness4/>:<Brightness7/>}
                     </IconButton>

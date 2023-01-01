@@ -1,7 +1,7 @@
 import { Box } from "@mui/system";
 import { useEffect, useImperativeHandle, useState } from "react";
 import Post from '../Post/Post.js';
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import { forwardRef } from "react";
 import Comment from "../Comment/Comment.js";
 
@@ -20,7 +20,7 @@ const PostsContainer = forwardRef((props,ref)=>{
     //     // populatePosts.then((value)=>{setPostsArray(value)});
     //     // console.log(populatePosts);
     // });
-    const [postsArray,setPostsArray] = useState(()=>{console.log('postContaniner was ccreated '); return [];})
+    const [postsArray,setPostsArray] = useState(()=>{ return [];})
 
     useEffect(()=>{
         (async()=>{
@@ -63,7 +63,7 @@ const PostsContainer = forwardRef((props,ref)=>{
     return (
         <Box >
             {postsArray!=undefined &&  <>
-                {postsArray.length==0 && <></>}
+                {postsArray.length==0 && <Typography color='text.secondary'> There are no posts to show </Typography>}
                 {isComments==false && postsArray.length!=0 &&  postsArray.map((element,index)=>{
                         return <Post keyindex={index} key={index} postobj={element} style={{marginTop:'10px'}} handlepostdeletion={handlePostDeletion}/>
                     }).reverse()}

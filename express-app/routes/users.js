@@ -25,7 +25,7 @@ router.get('/', async function(req, res, next) {
 router.get('/search/:searchQuery',
 async(req,res)=>{
   try{
-    req.params.searchQuery = req.params.searchQuery.trimStart().trimEnd().escape();
+    req.params.searchQuery = req.params.searchQuery.trimStart().trimEnd();
     console.log('value of seacrhQ is ' +req.params.searchQuery);
     if( req.params.searchQuery==undefined || req.params.searchQuery==undefined) throw 'seacrhQuesry was not assign a value';
     
@@ -215,8 +215,15 @@ router.post('/auth/google/token',function(req,res,next){
   });
 });
 
-router.get('/:userId',function(req,res){
-  console.log(req.params.userId);
+router.get('/:userId',async function(req,res){
+  try{
+    var user = await User.find({_id:req.params.userId},{password:0,profilePicUrl:0});
+    user=user[0];
+    // console.log(user);
+    return res.status(200).json({message:'success',user:user});
+  }catch(err){
+    return res.status(200).json({message:'error',error:err});  
+  }
 });
 
 router.get('/:userId/profileImage',(req,res)=>{

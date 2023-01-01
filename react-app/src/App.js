@@ -55,7 +55,7 @@ function App() {
             <Routes>
               <Route path='/' element={ <TempIndexComponent/>}/>
               <Route path='/LogIn' element={<SignInForm/>}/>
-              <Route path='/Profile' element={<Profile/>}/>
+              <Route path='/Profile/:personId' element={<Profile/>}/>
               <Route path='/Home' element={<HomeComponent/>}/>
             </Routes>
           </Box>
