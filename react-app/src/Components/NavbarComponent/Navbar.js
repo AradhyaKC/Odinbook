@@ -27,7 +27,7 @@ function ElevationScroll(props){
 
 function Navbar(props){
     const [state,setState] = useState({theme:'default'});
-    var {toggleTheme} =props; 
+    var {toggleTheme,setTheme} =props; 
     var theTheme = useTheme();
     const user = JSON.parse(window.sessionStorage.getItem('user'));
     var navigate = useNavigate();
@@ -36,9 +36,11 @@ function Navbar(props){
         var currentTheme = await toggleTheme();
         await setState({theme:currentTheme});
     }
-    const LogOut=async()=>{
+    const LogOut=async(e)=>{
+        e.preventDefault();
         window.sessionStorage.setItem('user',JSON.stringify({}));
-        navigate('/LogIn');
+        await setTheme({theme:'default'});
+        navigate('/login');
     }
     return (
         <ElevationScroll>
@@ -50,7 +52,7 @@ function Navbar(props){
                             <img id='odinbook-img' src={OdinbookImg}/>
                         </Link>
                     }
-                    {user==undefined &&  <img id='odinbook-img' src={OdinbookImg}/>}
+                    {(user==undefined ||Object.keys(user).length==0) &&  <img id='odinbook-img' src={OdinbookImg}/>}
                 </div>
                 {(user!=null &&user!=undefined && Object.keys(user).length!=0) && <div id='buttons'>
                     <img  id='user-img' src={(user.profilePicUrl==undefined)?UserImg:user.profilePicUrl}/> 

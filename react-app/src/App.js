@@ -40,6 +40,9 @@ function App() {
     });
     return state.theme;
   }
+  const setTheme = async(theme)=>{
+    await setState(theme);
+  }
   
 
   const TempIndexComponent=()=>{ return <div>you are now viewing the esteemed index page </div>}
@@ -47,7 +50,7 @@ function App() {
     <div className="center">
       <ThemeProvider theme={state.theme=='default'?defaultTheme:darkTheme}>
         <BrowserRouter>
-          <Navbar toggleTheme={ToggleTheme}/>
+          <Navbar setTheme={setTheme} toggleTheme={ToggleTheme}/>
           <Box sx={{height:'100%',width:'100%',flexGrow:'1',display:'flex',flexDirection:'column',
           backgroundColor:(state.theme=='dark'?'grey.900':'grey.200')}}>
             <div style={{height:'40px',}}> hello there</div>

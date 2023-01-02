@@ -136,15 +136,19 @@ function Profile(props){
         return returnResult;
     }
 
-    // const AddFriend=async(friendId)=>{
-    //     var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+friendId+'/friendRequests',{
-    //         method:'PUT', body:JSON.stringify({requestedBy:loggedInUser._id}),headers:{'content-type':'application/json'},mode:'cors',
-    //     });
-    //     response= await response.json();
-    //     if(response.message=='success'){
-            
-    //     }
-    // }
+    const AddFriend=async(friendId)=>{
+        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+friendId+'/friendRequests',{
+            method:'PUT', body:JSON.stringify({requestedBy:loggedInUser._id}),headers:{'content-type':'application/json'},mode:'cors',
+        });
+        response= await response.json();
+        if(response.message=='success'){
+            setPersonProfile((prevState)=>{
+                var newState={...prevState};
+                newState.friendRequests = response.friendRequests;
+                return newState;
+            });
+        }
+    }
 
     return (
         <Box id='profile-flex' >
@@ -167,9 +171,9 @@ function Profile(props){
                         <div style={{display:'flex',alignItems:'center'}}>
                             <Typography color='white' ml='7px' style={{fontSize:'1.2rem'}}> About me</Typography> 
                         </div>
-                        <div style={{flexGrow:1,textAlign:'right',height:'fit-content'}}>
+                        {loggedInUser._id==personProfile._id && <div style={{flexGrow:1,textAlign:'right',height:'fit-content'}}>
                             <IconButton onClick={(e)=>{setEditIsOpen(true);}}><Edit sx={{color:'white'}}/></IconButton>
-                        </div>
+                        </div>}
                     </Box>
                     <Typography color='text.primary' padding='5px' sx={{textAlign:'left',paddingLeft:'10px'}}>
                         {(personProfile.description==''||personProfile.description==undefined)?'Hello there , I am using Odinbook':personProfile.description}
@@ -181,9 +185,9 @@ function Profile(props){
                     </Box>
                 </Box>
                 
-                {/* Add Friend */}
-                {loggedInUser._id!=personProfile._id  && <Box sx={{marginTop:'20px',textAlign:'right',paddingRight:'10px'}}>
-                    <Button variant='contained' > Add Friend </Button>
+                {/* Add Friend  */}
+                {loggedInUser._id!=personProfile._id && !personProfile.friendRequests.includes(loggedInUser._id) && <Box sx={{marginTop:'20px',textAlign:'right',paddingRight:'10px'}}>
+                    <Button onClick={(e)=>{e.preventDefault();AddFriend(personProfile._id)}} variant='contained' > Add Friend </Button>
                 </Box >}
 
                 {/* Friend Req */}

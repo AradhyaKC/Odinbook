@@ -5,6 +5,7 @@ import { Typography } from "@mui/material";
 import PostForm from "../PostForm/PostForm";
 import { useTheme } from "@emotion/react";
 import FindFriendsComponent from "../FindFriendsComponent/FindFriendsComponent";
+import FriendRequestComponent from "../FriendRequestComponent/FriendRequestComponent";
 
 function HomeComponent(props){
     const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
@@ -23,6 +24,7 @@ function HomeComponent(props){
                     <Typography color='text.primary' style={{fontSize:'0.9rem',fontWeight:'400',overflow:'hidden'}}>{loggedInUser.email}</Typography>
                 </div>
             </div>
+            <FriendRequestComponent/>
         </div>
     </Box>);
 }
