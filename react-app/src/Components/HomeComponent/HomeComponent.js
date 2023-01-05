@@ -34,7 +34,7 @@ function HomeComponent(props){
         newResponse= await newResponse.json();
         if(newResponse.message=='success') returnResult.push(...newResponse.posts);
         
-        console.log(returnResult);
+        // console.log(returnResult);
         return returnResult;
     }
     const handlePostAddition=(postObj)=>{

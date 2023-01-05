@@ -20,7 +20,7 @@ function Profile(props){
 
     var theme = useTheme();
     const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
-    const [personProfile,setPersonProfile]=useState(JSON.parse(window.sessionStorage.getItem('user')));
+    const [personProfile,setPersonProfile]=useState({...loggedInUser,_id:personId});
 
 
     useEffect(()=>{
@@ -124,7 +124,6 @@ function Profile(props){
             console.error("failed to fetch posts");
             returnResult=[];
         }
-        // return Promise.resolve(returnResult);
         return returnResult;
     }
 
