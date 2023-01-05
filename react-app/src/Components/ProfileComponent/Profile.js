@@ -2,18 +2,15 @@ import './Profile.css';
 import Box from '@mui/material/Box';
 import { useTheme } from '@emotion/react';
 import { Button, Divider, IconButton, TextField, Typography } from '@mui/material';
-import { dark } from '@mui/material/styles/createPalette';
-import UserImg from "../../assets/User.png";
 import PostForm from '../PostForm/PostForm.js';
-import Check from '@mui/icons-material/Check';
-import Close from '@mui/icons-material/Close';
 import Edit from '@mui/icons-material/Edit';
 import Dialog from '@mui/material/Dialog';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { useParams,useLocation} from 'react-router-dom';
 import config from '../../config.json';
 import PostsContainer from '../PostsContainer/PostsContainer';
-//new user fields : description , joinDate , birthDate? , FriendList , PostList ,friendreqList,commentList?, profilePicUrl?
+import FriendRequestComponent from '../FriendRequestComponent/FriendRequestComponent';
+import FriendsComponent from '../FriendsComponent/FriendsComponent';
 
 function Profile(props){
 
@@ -36,11 +33,6 @@ function Profile(props){
         })();
     },[]);
 
-    // const tempPersonProfile=JSON.parse(window.sessionStorage.getItem('user'));// swap it with profile of person
-    // var personProfile = {...tempPersonProfile};  
-    // personProfile['description']=' this is tmeporary description written to test ui and ajsckajsncknaj aksjncaksnjcksjcnaks akjsnckjansckjancs';
-    // personProfile['joinDate']=new Date('Aug 12 2022');
-    // personProfile['profilePicUrl']='https://pluspng.com/img-png/user-png-icon-young-user-icon-2400.png';
 
     const onCloseEdit=()=>{
         setEditIsOpen(false);
@@ -136,22 +128,22 @@ function Profile(props){
         return returnResult;
     }
 
-    const AddFriend=async(friendId)=>{
-        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+friendId+'/friendRequests',{
-            method:'PUT', body:JSON.stringify({requestedBy:loggedInUser._id}),headers:{'content-type':'application/json'},mode:'cors',
-        });
-        response= await response.json();
-        if(response.message=='success'){
-            setPersonProfile((prevState)=>{
-                var newState={...prevState};
-                newState.friendRequests = response.friendRequests;
-                return newState;
-            });
-        }
-    }
+    // const AddFriend=async(friendId)=>{
+    //     var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+friendId+'/friendRequests',{
+    //         method:'PUT', body:JSON.stringify({requestedBy:loggedInUser._id}),headers:{'content-type':'application/json'},mode:'cors',
+    //     });
+    //     response= await response.json();
+    //     if(response.message=='success'){
+    //         setPersonProfile((prevState)=>{
+    //             var newState={...prevState};
+    //             newState.friendRequests = response.friendRequests;
+    //             return newState;
+    //         });
+    //     }
+    // }
 
     return (
-        <Box id='profile-flex' >
+        <Box id='profile-flex'>
             <EditProfileModal open={editIsOpen} handleClose={onCloseEdit}/>
             <div id='small-div'>
 
@@ -165,7 +157,7 @@ function Profile(props){
                 </div>
 
                 {/* About Me  */}
-                <Box mt='10px' sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),}} borderRadius='5px' >
+                <Box mt='10px' sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),margin:'10px'}} borderRadius='5px' >
                     <Box sx={{backgroundColor:(theme.palette.mode=='light'?'primary.main':'background.paper'),textAlign:'left', borderRadius:'5px 5px 0px 0px'
                     ,display:'flex',flexDirection:'row'}}>
                         <div style={{display:'flex',alignItems:'center'}}>
@@ -186,71 +178,15 @@ function Profile(props){
                 </Box>
                 
                 {/* Add Friend  */}
-                {loggedInUser._id!=personProfile._id && !personProfile.friendRequests.includes(loggedInUser._id) && <Box sx={{marginTop:'20px',textAlign:'right',paddingRight:'10px'}}>
+                {/* {loggedInUser._id!=personProfile._id && !personProfile.friendRequests.includes(loggedInUser._id) && <Box sx={{marginTop:'20px',textAlign:'right',paddingRight:'10px'}}>
                     <Button onClick={(e)=>{e.preventDefault();AddFriend(personProfile._id)}} variant='contained' > Add Friend </Button>
-                </Box >}
+                </Box >} */}
 
                 {/* Friend Req */}
-                <Box sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800')}} mt='20px' borderRadius='5px'>
-                    <Box sx={{backgroundColor:(theme.palette.mode=='light'?'primary.main':'background.paper'),padding:'5px',paddingLeft:'0px',
-                    textAlign:'left',borderRadius:'5px 5px 0px 0px'}}>
-                        <Typography  color='white' ml='7px' style={{fontSize:'1.2rem'}}>Pending Friend Requests</Typography>
-                    </Box>
-                    <div style={{display:'flex',flexDirection:'row',padding:'5px',alignItems:'center',overflow:'hidden'}}> 
-                        <div style={{display:'flex',flexDirection:'row',width:'0px',flexGrow:1,overflow:'hidden',verticalAlign:'center'}}>
-                            <img src={UserImg} style={{width:'35px',height:'35px',borderRadius:'50%',marginLeft:'10px'}}/>
-                            <Typography color='text.primary' mt='5px' ml='10px' fontSize='1.1rem'> IAmUserFriend</Typography>
-                        </div>
-                        <div style={{display:'flex',flexDirection:'row', flexWrap:'nowrap',textAlign:'right',paddingRight:'10px',width:'max-content'}}>
-                            <IconButton><Check sx={{color:'info.main'}}/> </IconButton>
-                            <IconButton> <Close sx={{color:'error.main'}} /></IconButton>
-                        </div>
-                    </div>
-                    <div style={{display:'flex',flexDirection:'row',padding:'5px',alignItems:'center',overflow:'hidden'}}> 
-                        <div style={{display:'flex',flexDirection:'row',width:'0px',flexGrow:1,overflow:'hidden',verticalAlign:'center'}}>
-                            <img src={UserImg} style={{width:'35px',height:'35px',borderRadius:'50%',marginLeft:'10px'}}/>
-                            <Typography color='text.primary' mt='5px' ml='10px' fontSize='1.1rem'> IAmUserFriend</Typography>
-                        </div>
-                        <div style={{display:'flex',flexDirection:'row', flexWrap:'nowrap',textAlign:'right',paddingRight:'10px',width:'max-content'}}>
-                            <IconButton><Check sx={{color:'info.main'}}/> </IconButton>
-                            <IconButton> <Close sx={{color:'error.main'}} /></IconButton>
-                        </div>
-                    </div>
-                </Box>
+                <FriendRequestComponent/>
 
                 {/* Friend List */}
-                <Box sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800')}} mt='20px' borderRadius='5px'>
-                    <Box sx={{backgroundColor:(theme.palette.mode=='light'?'primary.main':'background.paper'),textAlign:'left'
-                    ,borderRadius:'5px 5px 0px 0px',padding:'5px',paddingLeft:'0px',}}>
-                        <Typography  color='white' ml='7px' style={{fontSize:'1.2rem'}}>Friends</Typography>
-                    </Box>
-                    <div style={{display:'flex',flexDirection:'row',padding:'5px'}}> 
-                        <img src={UserImg} style={{width:'25px',borderRadius:'50%',marginLeft:'10px'}}/>
-                        <Typography color='text.primary' ml='10px' fontSize='1.1rem'> IAmUserFriend</Typography>
-                    </div>
-                    <Divider/>
-                    <div style={{display:'flex',flexDirection:'row',padding:'5px'}}> 
-                        <img src={UserImg} style={{width:'25px',borderRadius:'50%',marginLeft:'10px'}}/>
-                        <Typography color='text.primary' ml='10px' fontSize='1.1rem'> IAmUserFriend</Typography>
-                    </div>
-                    <Divider/>
-                    <div style={{display:'flex',flexDirection:'row',padding:'5px'}}> 
-                        <img src={UserImg} style={{width:'25px',borderRadius:'50%',marginLeft:'10px'}}/>
-                        <Typography color='text.primary' ml='10px' fontSize='1.1rem'> IAmUserFriend</Typography>
-                    </div>
-                    <Divider/>
-                    <div style={{display:'flex',flexDirection:'row',padding:'5px'}}> 
-                        <img src={UserImg} style={{width:'25px',borderRadius:'50%',marginLeft:'10px'}}/>
-                        <Typography color='text.primary' ml='10px' fontSize='1.1rem'> IAmUserFriend</Typography>
-                    </div>
-                    <Divider/>
-                    <div style={{display:'flex',flexDirection:'row',padding:'5px'}}> 
-                        <img src={UserImg} style={{width:'25px',borderRadius:'50%',marginLeft:'10px'}}/>
-                        <Typography color='text.primary' ml='10px' fontSize='1.1rem'> IAmUserFriend</Typography>
-                    </div>
-                    <Divider/>
-
-                </Box>
+                <FriendsComponent/>
             </div>
             <div id='big-div'>
                 {loggedInUser._id==personProfile._id && <PostForm handlePostAddition={handlePostAddition}/>}

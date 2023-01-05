@@ -1,4 +1,4 @@
-#profile-flex,#home-flex{
+#home-flex{
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -10,7 +10,7 @@
 #small-div{
     /* background-color: white; */
     flex-grow: 0.33;
-    max-width: 33%;
+    max-width: 33%; 
 }
 #big-div{
     max-width: 66%;
@@ -33,7 +33,7 @@
 
 
 @media screen and (max-width:1250px) {
-    #profile-flex,#home-flex{
+    #home-flex{
         width: 90%;
     }
 }
@@ -41,7 +41,7 @@
     #user-info{
         display: none;
     }
-    #profile-flex,#home-flex{
+    #home-flex{
         max-width: 450px;
         flex-direction: column-reverse;
     }

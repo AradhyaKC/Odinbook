@@ -61,9 +61,10 @@ const PostsContainer = forwardRef((props,ref)=>{
             onDeletePost(index);
     } 
     return (
-        <Box >
+        <Box {...props} >
             {postsArray!=undefined &&  <>
-                {postsArray.length==0 && <Typography color='text.secondary'> There are no posts to show </Typography>}
+                {postsArray.length==0 && isComments==false && <Typography color='text.secondary'> There are no posts to show </Typography>}
+                {postsArray.length==0 && isComments==true && <Typography color='text.secondary'> </Typography>}
                 {isComments==false && postsArray.length!=0 &&  postsArray.map((element,index)=>{
                         return <Post keyindex={index} key={index} postobj={element} style={{marginTop:'10px'}} handlepostdeletion={handlePostDeletion}/>
                     }).reverse()}

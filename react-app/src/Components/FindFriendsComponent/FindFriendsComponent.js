@@ -61,7 +61,6 @@ function FindFriendsComponent(props){
     const handleSearchValueChange =async(e)=>{
         e.preventDefault();
         await setSearchValue(e.target.value);
-        // console.log('teh search value is'+searchValue+' ,e.target.laue =' +e.target.value);
         var response;
         if(e.target.value=='' || e.target.value==undefined){
         response=await fetch(config.EXPRESS_APP_BASE_URL+'/users/');
@@ -77,14 +76,9 @@ function FindFriendsComponent(props){
                 else if(userElement.friendRequests.includes(loggedInUser._id)) return false;
                 else return true;
             });
-            // console.log(filteredUsers);
             setFriendList(filteredUsers);
         }
     }
-    // const ProfileRedirect = (e)=>{
-    //     e.preventDefault();
-    //     navigate('/Profile');
-    // }
 
     return(
     <Box sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),padding:'10px',borderRadius:'5px'}} {...props}>

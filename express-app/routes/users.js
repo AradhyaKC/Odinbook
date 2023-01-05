@@ -263,6 +263,18 @@ router.put('/:userId/friendRequests',async(req,res)=>{
     return res.status(200).json({message:'error',error:err});  
   }
 });
+router.get('/:userId/friends',async(req,res)=>{
+  try{
+    var user = await User.findOne({_id:req.params.userId},{password:0,profilePicUrl:0});
+    var userFriends =await Promise.all(user.friends.map(async(friendId)=>{
+      return await User.findOne({_id:friendId},{password:0,profilePicUrl:0});
+    }));
+    return res.status(200).json({message:'success',friends:userFriends});
+  }catch(err){
+    console.log(err);
+    return res.status(200).json({message:'error',error:err});  
+  }
+});
 
 router.delete('/:userId/friendRequests/:friendRequestId',async(req,res)=>{
   try{
