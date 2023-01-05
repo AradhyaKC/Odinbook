@@ -264,6 +264,100 @@ router.put('/:userId/friendRequests',async(req,res)=>{
   }
 });
 
+router.delete('/:userId/friendRequests/:friendRequestId',async(req,res)=>{
+  try{
+    var user = await User.find({_id:req.params.userId},{password:0,profilePicUrl:0});
+    user = user[0];
+
+    if(user.friendRequests.includes(req.params.friendRequestId)){
+      var index = user.friendRequests.findIndex(friendReqId=>friendReqId==req.params.friendRequestId);
+      console.assert(index>=0,'could not find friendReq from the friendReqList');
+      user.friendRequests.splice(index,1)
+    }else{
+      return res.status(400).json({message:'error',error:'there does not exist a friendReq with the friendReqId provided'});
+    }
+    await user.save();
+    return res.status(200).json({message:'success',user:user});
+  }catch(err){
+    console.log(err);
+    return res.status(200).json({message:'error',error:err});  
+  }
+});
+
+router.post('/:userId/friends/:friendId',async(req,res)=>{
+  try{
+    // console.log(req.body.friend1+'  2: '+req.body.friend2);
+    var [friend1,friend2] = await Promise.all([
+      User.find({_id:req.params.userId},{password:0,profilePicUrl:0}),
+      User.find({_id:req.params.friendId},{password:0,profilePicUrl:0})
+    ]);
+    
+    friend1=friend1[0];
+    friend2=friend2[0];
+
+    if(friend1.friends.length!=0 && friend1.friends.includes(friend2._id)){
+      return res.status(200).json({message:'error',error:'the pair are alreaady friends'});
+    }
+    if(friend2.friends.length!=0 && friend2.friends.includes(friend1._id)){
+      return res.status(200).json({message:'error',error:'the pair are alreaady friends'});
+    }
+
+    if(friend1.friendRequests.includes(friend2._id)){
+      var index =friend1.friendRequests.indexOf(friend2._id);
+      console.assert(index>=0,'could not find friend ');
+      friend1.friendRequests.splice(index,1);
+    }
+    if(friend2.friendRequests.includes(friend1._id)){
+      var index =friend1.friendRequests.indexOf(friend2._id);
+      console.assert(index>=0,'could not find friend ');
+      friend1.friendRequests.splice(index,1);
+    }
+
+    friend1.friends.push(friend2._id);
+    friend2.friends.push(friend1._id);
+    console.log(friend1);
+
+    await Promise.all([friend1.save(),friend2.save()]);
+    return res.status(200).json({message:'success',friends:[friend1,friend2]});
+
+  }catch(err){
+    console.log(err);
+    return res.status(200).json({message:'error',error:err});  
+  }
+});
+
+router.delete('/:userId/friends/:friendId',async(req,res)=>{
+  try{
+    var friend1 = await User.find({_id:req.params.userId},{password:0,profilePicUrl:0});
+    if(req.params.friendId==undefined ||req.params.friendId==''){
+      throw 'the freind to remove has not been specified';
+    }
+    var friend2= await User.find({_id:req.params.friendId},{password:0,profilePicUrl:0});
+
+    if(!friend1.friends.includes(req.params.friendId)){
+      throw 'not possible to remove user friend as they are not friends';
+    }else{
+      var index = friend1.friends.findIndex(friendId=>friendId==req.params.friendId);
+      console.assert(index>=0,'was able to find friend mong friendList');
+      friend1.friends.splice(index,1);
+    }
+
+    if(!friend2.friends.includes(req.params.userId)){
+      throw 'not possible to remove user friend as they are not friends';
+    }else{
+      var index = friend2.friends.findIndex(friendId=>friendId==req.params.userId);
+      console.assert(index>=0,'was able to find friend mong friendList');
+      friend1.friends.splice(index,1);
+    }
+
+    await Promise.all([friend1.save(),friends2.save()]);
+    return res.status(200).json({message:'success',friends:[friend1,friend2]});
+  }catch(err){
+    console.log(err);
+    return res.status(200).json({message:'error',error:err});  
+  }
+});
+
 // router.use('/:userId/posts',postsRouter);
 // router.post('/:userId/posts/',
 // // body('postedBy', 'the id of the user posting was invalid or the user could npt be found').custom(async (postedByUserId)=>{

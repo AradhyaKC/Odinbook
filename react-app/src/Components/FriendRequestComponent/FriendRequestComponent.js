@@ -23,22 +23,59 @@ function FriendRequestComponent(props){
         (async()=>{
             // var response = await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+loggedInUser._id);
             var friendReqs =[]; 
-            friendReqs =await Promise.all(loggedInUser.friendRequests.map(async(friendReqEle)=>{
-                var response = await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+friendReqEle);
-                response = await response.json();
-                if(response.message=='success'){
-                    return response.user;
-                }
-            }));
-            setUserFriendReqs(friendReqs);
+            var userResponse =await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+loggedInUser._id);
+            userResponse = await userResponse.json();
+            // console.log(userResponse);
+            if(userResponse.message=='success'){
+                friendReqs =await Promise.all(userResponse.user.friendRequests.map(async(friendReqEle)=>{
+                    var response = await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+friendReqEle);
+                    response = await response.json();
+                    if(response.message=='success'){
+                        return response.user;
+                    }
+                }));
+                setUserFriendReqs(friendReqs);
+            }else{
+
+            }
         })();
     },[]);
 
-    const acceptFriendRequest= async(friendId)=>{
-        
+    const AcceptFriendRequest= async(friendId)=>{
+        var response = await fetch(config.EXPRESS_APP_BASE_URL+'/users/'+loggedInUser._id+'/friends/'+friendId,{
+            method:'POST', headers:{'content-type':'application/json'}, mode:'cors'
+        });
+        response = await response.json();
+        if(response.message=='success'){
+            setUserFriendReqs((prevState)=>{
+                var newState = [...prevState];
+                var index = newState.findIndex(friendReq=> friendReq._id == friendId);
+                console.assert(index>=0,'could no find index of friendReq frim friend state array ');
+                newState.splice(index,1);
+                // console.log(newState);
+                return newState;
+            });
+        }
     }
 
-    return (userFriendReqs!=undefined &&
+    const RejectFriendRequest =async(friendReqId)=>{
+        var response =await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+loggedInUser._id+'/friendRequests/'+friendReqId,{
+            mode:'cors',headers:{'content-type':'application/json'}, method:'DELETE',
+        });
+        response = await response.json();
+        if(response.message=='success'){
+            setUserFriendReqs((prevState)=>{
+                var newState = [...prevState];
+                var index = newState.findIndex(friendReq=> friendReq._id == friendReqId);
+                console.assert(index>=0,'could no find index of friendReq frim friend state array ');
+                newState.splice(index,1);
+                // console.log(newState);
+                return newState;
+            });
+        }
+    }
+
+    return (userFriendReqs!=undefined && 
         <Box sx={{backgroundColor:(theme.palette.mode=='light'?'white':'grey.800'),margin:'10px'}} mt='20px' borderRadius='5px'>
             <Box sx={{backgroundColor:(theme.palette.mode=='light'?'primary.main':'background.paper'),padding:'5px',paddingLeft:'0px',
                 textAlign:'left',borderRadius:'5px 5px 0px 0px'}}>
@@ -51,11 +88,12 @@ function FriendRequestComponent(props){
                         <Typography color='text.primary' mt='5px' ml='10px' fontSize='1.1rem'>{friendReqEle.first_name+' '+friendReqEle.last_name}</Typography>
                     </div>
                     <div style={{display:'flex',flexDirection:'row', flexWrap:'nowrap',textAlign:'right',paddingRight:'10px',width:'max-content'}}>
-                        <IconButton><Check sx={{color:'info.main'}}/> </IconButton>
-                        <IconButton> <Close sx={{color:'error.main'}} /></IconButton>
+                        <IconButton onClick={(e)=>{e.preventDefault();AcceptFriendRequest(friendReqEle._id);}}><Check sx={{color:'info.main'}}/> </IconButton>
+                        <IconButton onClick={(e)=>{e.preventDefault();RejectFriendRequest(friendReqEle._id);}}><Close sx={{color:'error.main'}} /></IconButton>
                     </div>
                 </div>
             })}
+            {userFriendReqs.length==0 && <Typography color='text.secondary'> there are no pending requests </Typography>} 
         </Box>
     );
 }

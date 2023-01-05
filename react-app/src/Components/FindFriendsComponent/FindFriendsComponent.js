@@ -29,7 +29,10 @@ function FindFriendsComponent(props){
             if(response.message=='success'){
                 var filteredUsers=response.users.filter((userElement)=>{
                     if(userElement._id==loggedInUser._id) return false;
-                    return !userElement.friendRequests.includes(loggedInUser._id); // also add not friedns later;
+                    else if(userElement.friends.includes(loggedInUser._id)) return false;
+                    else if(userElement.friendRequests.includes(loggedInUser._id)) return false;
+                    else return true;
+                    // return !(userElement.friendRequests.includes(loggedInUser._id) || userElement.friends.includes(loggedInUser._id)); // also add not friedns later;
                 });
                 setFriendList(filteredUsers);
             }
@@ -70,7 +73,9 @@ function FindFriendsComponent(props){
         if(response.message=='success'){
             var filteredUsers=response.users.filter((userElement)=>{
                 if(userElement._id==loggedInUser._id) return false;
-                return !userElement.friendRequests.includes(loggedInUser._id); // also add not friedns later;
+                else if(userElement.friends.includes(loggedInUser._id)) return false;
+                else if(userElement.friendRequests.includes(loggedInUser._id)) return false;
+                else return true;
             });
             // console.log(filteredUsers);
             setFriendList(filteredUsers);

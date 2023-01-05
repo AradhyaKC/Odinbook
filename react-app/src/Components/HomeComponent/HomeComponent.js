@@ -17,7 +17,7 @@ function HomeComponent(props){
             <FindFriendsComponent style={{marginTop:'10px'}}/>
         </div>
         <div id='small-div'>
-            <div style={{display:'flex',flexDirection:'row',alignItems:'center',overflow:'hidden',marginTop:'10px',justifyContent:'center'}}>
+            <div id='user-info' >
                 <img src={config.EXPRESS_APP_BASE_URL+'/users/'+loggedInUser._id+'/profileImage'} style={{borderRadius:'50%',width:'100px'}}/>
                 <div>
                     <Typography color='text.primary' style={{fontSize:'1.3rem',fontWeight:'500',overflow:'hidden'}} > {loggedInUser.first_name +' '+loggedInUser.last_name} </Typography>

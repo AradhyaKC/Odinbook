@@ -22,6 +22,14 @@
 #edit-profile-img{
     width:100px;
 }
+#user-info{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden;
+    margin-top: 10px;
+    justify-content: center;
+}
 
 
 @media screen and (max-width:1250px) {
@@ -30,6 +38,9 @@
     }
 }
 @media screen and (max-width:650px) {
+    #user-info{
+        display: none;
+    }
     #profile-flex,#home-flex{
         max-width: 450px;
         flex-direction: column-reverse;
