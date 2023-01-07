@@ -10,11 +10,7 @@ const UserSchema =new Schema({
     googleId:{type:String, required:false},
     joinDate:{type:String,required:false,},
     description:{type:String,required:false,minLenght:3},
-    profilePicUrl:{
-        name:String,
-        data:Buffer,
-        contentType:String
-    },
+    profilePicUrl:{type:String,required:false},
     friendRequests:[{type:mongoose.SchemaTypes.ObjectId, ref:'User',required:'false',default:[]}],
     friends:[{type:mongoose.SchemaTypes.ObjectId, ref:'User',required:'false',default:[]}]
 });

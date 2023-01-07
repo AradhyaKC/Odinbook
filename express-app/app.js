@@ -16,6 +16,14 @@ require('dotenv').config();
 var app = express();
 module.exports = app;
 
+var mongooseConnectionString = process.env.MONGOOSE_CONNECTION_STRING;
+mongoose.connect(mongooseConnectionString, {useNewUrlParser:true, useUnifiedTopology:true});
+
+const db = mongoose.connection;
+db.on('error',()=>{
+  console.error('mongodb connection error');
+});
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -113,10 +121,4 @@ app.use(function(err, req, res, next) {
 });
 
 
-var mongooseConnectionString = process.env.MONGOOSE_CONNECTION_STRING;
-mongoose.connect(mongooseConnectionString, {useNewUrlParser:true, useUnifiedTopology:true});
 
-const db = mongoose.connection;
-db.on('error',()=>{
-  console.error('mongodb connection error');
-})

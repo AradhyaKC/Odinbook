@@ -10,6 +10,9 @@ const fs=require('fs');
 const async = require('async');
 const path = require('path');
 const postsRouter = require('./posts');
+const {GridFsStorage} = require('multer-gridfs-storage');
+const crypto = require('crypto');
+var mongoose = require('mongoose');
 
 /* GET users listing. */
 router.get('/', async function(req, res, next) {
@@ -112,29 +115,51 @@ router.post('/LogIn',function(req,res,next){
   })(req,res,next);
 });
 
-var storage= multer.diskStorage({destination: 'uploads/' ,fileFilter: (req, file, cb) => {
-  if (
-    file.mimetype == 'image/png' ||
-    file.mimetype == 'image/jpeg' ||
-    file.mimetype == 'image/jpg'
-  ) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-    const err = new Error('Only .jpg .jpeg .png images are supported!');
-    err.name = 'ExtensionError';
-    return cb(err);
+// var storage= multer.diskStorage({destination: 'uploads/' ,fileFilter: (req, file, cb) => {
+//   if (
+//     file.mimetype == 'image/png' ||
+//     file.mimetype == 'image/jpeg' ||
+//     file.mimetype == 'image/jpg'
+//   ) {
+//     cb(null, true);
+//   } else {
+//     cb(null, false);
+//     const err = new Error('Only .jpg .jpeg .png images are supported!');
+//     err.name = 'ExtensionError';
+//     return cb(err);
+//   }
+// },
+// filename:function(req,file,cb){
+//   let fileType= file.mimetype;
+//   fileType = fileType.slice(6);
+//   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+//   // console.log(file.fieldname + '-' + uniqueSuffix+'.'+fileType);
+//   return cb(null, file.fieldname + '-' + uniqueSuffix+'.'+fileType);
+// }
+// });
+
+// const upload = multer({storage:storage}).single('profilePicUrl');
+
+const storage = new GridFsStorage({
+  url: process.env.MONGOOSE_CONNECTION_STRING,
+  file: (req, file) => {
+      return new Promise((resolve, reject) => {
+          crypto.randomBytes(16, (err, buf) => {
+              if (err) {
+                  return reject(err);
+              }
+              const filename = buf.toString('hex') + path.extname(file.originalname);
+              const fileInfo = {
+                  filename: filename,
+                  bucketName: 'uploads'
+              };
+              resolve(fileInfo);
+          });
+      });
   }
-},
-filename:function(req,file,cb){
-  let fileType= file.mimetype;
-  fileType = fileType.slice(6);
-  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-  // console.log(file.fieldname + '-' + uniqueSuffix+'.'+fileType);
-  return cb(null, file.fieldname + '-' + uniqueSuffix+'.'+fileType);
-}
 });
-const upload = multer({storage:storage}).single('profilePicUrl');
+
+const upload = multer({ storage }).single('profilePicUrl');
 
 router.patch('/:userId',(req, res,next) =>
   {
@@ -162,9 +187,7 @@ router.patch('/:userId',(req, res,next) =>
     // console.log(req.params.userId);
     // console.log(req.body);
     User.updateOne({_id:req.params.userId},{'$set':{
-      first_name:req.body.first_name, last_name:req.body.last_name, description:req.body.description,profilePicUrl:{
-        'name':req.file.filename,data:fs.readFileSync('uploads/'+req.file.filename), contentType:req.file.mimetype,
-      }
+      first_name:req.body.first_name, last_name:req.body.last_name, description:req.body.description,profilePicUrl:req.file.filename,
     }},(err, result)=>{
       if(err) return res.status(400).json({message:'error',errors:['failed to update or find existing user']});
       User.findById(req.params.userId,(err,user)=>{
@@ -226,27 +249,57 @@ router.get('/:userId',async function(req,res){
   }
 });
 
-router.get('/:userId/profileImage',(req,res)=>{
-  async.parallel([
-    (callback)=>{
-      User.find({_id:req.params.userId},callback);
-    }
-  ],(err,results)=>{
-    if(err) return res.status(500).json({message:'error',errors:err});
-    // console.log(results[0]);
-    var picture=results[0][0]['profilePicUrl'];
-    // let imageFormat = results[0][0]['profilePicUrl']['contentType'];
-    // imageFormat = imageFormat.slice(6);
-    // const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
-    // response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
-    if(picture.name!='' && picture.name!=undefined){
-      // return res.sendFile(path.join(__dirname,'../upload s/'+picture['name']+'.'+imageFormat));
-      return res.sendFile(path.join(__dirname,'../uploads/'+picture['name']));
-    }else{ 
-      return res.sendFile(path.join(__dirname ,'../User.png'));
-    }
+// router.get('/:userId/profileImage',(req,res)=>{
+//   async.parallel([
+//     (callback)=>{
+//       User.find({_id:req.params.userId},callback);
+//     }
+//   ],(err,results)=>{
+//     if(err) return res.status(500).json({message:'error',errors:err});
+//     // console.log(results[0]);
+//     var picture=results[0][0]['profilePicUrl'];
+//     // let imageFormat = results[0][0]['profilePicUrl']['contentType'];
+//     // imageFormat = imageFormat.slice(6);
+//     // const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
+//     // response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
+//     if(picture.name!='' && picture.name!=undefined){
+//       // return res.sendFile(path.join(__dirname,'../upload s/'+picture['name']+'.'+imageFormat));
+//       return res.sendFile(path.join(__dirname,'../uploads/'+picture['name']));
+//     }else{ 
+//       return res.sendFile(path.join(__dirname ,'../User.png'));
+//     }
+//   });
+// });
+
+const url = process.env.MONGOOSE_CONNECTION_STRING;
+const connect = mongoose.createConnection(url, { useNewUrlParser: true, useUnifiedTopology: true });
+let gfs;
+
+connect.once('open', () => {
+// initialize stream
+  gfs = new mongoose.mongo.GridFSBucket(connect.db, {
+    bucketName: "uploads"
   });
 });
+
+router.get('/:userId/profileImage',async(req,res)=>{
+  try{
+    var user = await User.findOne({_id:req.params.userId},{password:0});
+    if(user.profilePicUrl!=undefined && user.profilePicUrl!=''){
+      gfs.find({filename:user.profilePicUrl}).toArray((err,files)=>{
+        if(!files[0]||files.length==0) return res.status(200).json({message:'error',error:'no such file is available'});
+        gfs.openDownloadStreamByName(user.profilePicUrl).pipe(res);
+      });
+    }else{
+      return res.sendFile(path.join(__dirname ,'../User.png'));
+    }
+  }catch(err){
+    console.log(err);
+    return res.status(200).json({message:'error',error:err}); 
+  }
+});
+
+
 
 router.put('/:userId/friendRequests',async(req,res)=>{
   try{
