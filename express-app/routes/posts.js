@@ -74,7 +74,7 @@ router.get('/',(req,res)=>{
 router.put('/:postId/likes',(req,res)=>{
     Post.findOne({_id:req.params.postId}).populate({path:'postedBy',model:'User',select:{_id:1,first_name:1,last_name:1}}).exec((err,results)=>{
         var post = results;
-        console.log(post);
+        // console.log(post);
         if(post.likes.includes(req.body.likedBy)){
             let index =post.likes.indexOf(req.body.likedBy);
             post.likes.splice(index,1);

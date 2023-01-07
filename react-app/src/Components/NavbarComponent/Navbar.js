@@ -11,6 +11,7 @@ import Brightness4 from '@mui/icons-material/Brightness4';
 import Brightness7 from '@mui/icons-material/Brightness7';
 import Logout from '@mui/icons-material/Logout';
 import { Link, useNavigate } from "react-router-dom";
+import config from '../../config.json';
 
 
 function ElevationScroll(props){
@@ -55,7 +56,7 @@ function Navbar(props){
                     {(user==undefined ||Object.keys(user).length==0) &&  <img id='odinbook-img' src={OdinbookImg}/>}
                 </div>
                 {(user!=null &&user!=undefined && Object.keys(user).length!=0) && <div id='buttons'>
-                    <img  id='user-img' src={(user.profilePicUrl==undefined)?UserImg:user.profilePicUrl}/> 
+                    <img  id='user-img' src={config.EXPRESS_APP_BASE_URL+'/users/'+user._id+'/profileImage'}/> 
                     <Link to={{pathname:'/Profile/'+user._id}}>
                         <div id='username' style={{color:'white'}}> {user.first_name} </div>
                     </Link>

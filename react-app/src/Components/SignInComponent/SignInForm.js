@@ -120,6 +120,23 @@ function SignInForm(props){
             throw 'server error';
         }
     }
+    const LoginExampleUser =async()=>{
+        var response = await fetch(config.EXPRESS_APP_BASE_URL +'/users/LogIn',{
+            method:'POST',headers:new Headers({'content-type':'application/json'}),
+            // body:JSON.stringify(`email=${formObj['email']}&password=${formObj['password']}`),
+            body:JSON.stringify({email:'ExampleUser@mail.com',password:'ExampleUser@mail.com'}),
+        });
+        response=await response.json();
+        if(response.message=='success'){
+            if(response.user['profilePicUrl']!=undefined){
+                const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
+                response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
+            }
+            window.sessionStorage.setItem('user',JSON.stringify(response.user));
+            setLoginState({errors:[]});
+            navigate('/Home');
+        }
+    }
     
 
     return (
@@ -138,7 +155,7 @@ function SignInForm(props){
                 <MyButton onClick={LogIn}> Log In </MyButton>
                 <MyButton onClick={(e)=>{ e.preventDefault();setSignInIsOpen(!signInIsOpen);}}
                  style={{backgroundColor:'rgb(72, 182, 54)'}}> Create an account </MyButton>
-                <MyButton style={{backgroundColor:'orange'}}> Test drive an existing account </MyButton>
+                <MyButton onClick ={(e)=>{e.preventDefault(); LoginExampleUser();}} style={{backgroundColor:'orange'}}> Test drive an existing account </MyButton>
                 {/* <MyButton style={{backgroundColor:'blue'}} onClick={GoogleLogIn}>  Log in with Google</MyButton> */}
                 <div style={{margin:'9px auto'}}>
                 <GoogleLogin onSuccess={responseSuccessGoogle} onError={()=>{console.log('something went wrong');}}/>

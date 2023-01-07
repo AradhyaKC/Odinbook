@@ -55,27 +55,6 @@ passport.use(
   })
 );
 
-// passport.use(new GoogleStrategy({
-//   clientID:'507919399774-ki6hcn8dup2elht7788ie6b2v4u8iu5m.apps.googleusercontent.com',
-//   clientSecret:'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',
-//   callbackURL:'http://localhost:3000/users/auth/google/callback',
-//   passReqToCallback:true,
-//   },
-//   function(request, accessToken, refreshToken, profile, cb) {
-//     console.log(profile);
-//     User.findOrCreate(
-//       {
-//         googleId: profile.id,
-//         first_name:profile._json.name,
-//         last_name:profile._json.family_name,
-//         email:profile._json.email,
-//       }, 
-//       function(err, user)
-//       {
-//         return cb(err, user);
-//       }
-//     );
-// }));
 
 passport.use(new GoogleTokenStrategy({
     clientID:process.env.GOOGLE_CLIENT_ID,
@@ -111,14 +90,7 @@ app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.use('*',(req,res,next)=>{
-//   const protocol = req.protocol;
-//   const host = req.hostname;
-//   const port = app.get('port');
-//   app.set('SERVER_DOMAIN',`${protocol}://${host}:${port}`);
-//   // console.log(app.get("SERVER_DOMAIN"));
-//   next()
-// });
+
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -141,7 +113,7 @@ app.use(function(err, req, res, next) {
 });
 
 
-var mongooseConnectionString = "mongodb+srv://m001-student:m001-mongodb-basics@firstcluster.zr33pxh.mongodb.net/?retryWrites=true&w=majority";
+var mongooseConnectionString = process.env.MONGOOSE_CONNECTION_STRING;
 mongoose.connect(mongooseConnectionString, {useNewUrlParser:true, useUnifiedTopology:true});
 
 const db = mongoose.connection;

@@ -28,10 +28,11 @@ function Profile(props){
             var response = await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+personId);
             response = await response.json();
             if(response.message=='success'){
-                setPersonProfile(response.user);
+                await setPersonProfile(response.user);
+                postsContainerRef.current.refreshPosts();
             }
         })();
-    },[]);
+    },[personId]);
 
 
     const onCloseEdit=()=>{
@@ -182,10 +183,10 @@ function Profile(props){
                 </Box >} */}
 
                 {/* Friend Req */}
-                <FriendRequestComponent/>
+                {loggedInUser._id==personId && <FriendRequestComponent/>}
 
                 {/* Friend List */}
-                <FriendsComponent/>
+                <FriendsComponent showFriendsOfId={personId}/>
             </div>
             <div id='big-div'>
                 {loggedInUser._id==personProfile._id && <PostForm handlePostAddition={handlePostAddition}/>}

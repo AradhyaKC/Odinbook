@@ -11,11 +11,13 @@ function FriendsComponent(props){
     const theme = useTheme();
     const [friends,setFriends] = useState(undefined);    
     const loggedInUser= JSON.parse(window.sessionStorage.getItem('user'));
+    var idOfFriend1= loggedInUser._id;
+    if(props.showFriendsOfId!=undefined) idOfFriend1=props.showFriendsOfId;
 
 
     useEffect(()=>{
         (async()=>{
-            var response = await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+loggedInUser._id+'/friends');
+            var response = await fetch(config.EXPRESS_APP_BASE_URL +'/users/'+idOfFriend1+'/friends');
             response=await response.json();
             if(response.message=='success'){
                 setFriends(response.friends);

@@ -9,6 +9,7 @@ import Comment from "../Comment/Comment.js";
 const PostsContainer = forwardRef((props,ref)=>{
     const newProps = {...props};
     const {populatePosts,isComments,onDeletePost} =newProps;
+    const [refresh,setRefresh] = useState(true);
     newProps.populatePosts=undefined;
     newProps.onDeletePost=undefined;
     // const [postsArray,setPostsArray] = useState(()=>{
@@ -27,7 +28,7 @@ const PostsContainer = forwardRef((props,ref)=>{
             var newPosts = await populatePosts();
             setPostsArray(newPosts);
         })();
-    },[]);
+    },[refresh]);
 
     // useImperativeHandle(ref,()=>{
     //     var thisRef ={};
@@ -47,6 +48,9 @@ const PostsContainer = forwardRef((props,ref)=>{
                 newState.push(postObj);
                 return newState;
             });
+        },
+        refreshPosts:()=>{
+            setRefresh(!refresh);
         }
     }
     ));
