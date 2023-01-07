@@ -237,6 +237,8 @@ router.get('/:userId/profileImage',(req,res)=>{
     var picture=results[0][0]['profilePicUrl'];
     // let imageFormat = results[0][0]['profilePicUrl']['contentType'];
     // imageFormat = imageFormat.slice(6);
+    // const base64String= btoa(String.fromCharCode(...new Uint8Array(response.user['profilePicUrl'].data.data)));
+    // response.user['profilePicUrl']=`data:${response.user['profilePicUrl'].contentType};base64,${base64String}`;
     if(picture.name!='' && picture.name!=undefined){
       // return res.sendFile(path.join(__dirname,'../upload s/'+picture['name']+'.'+imageFormat));
       return res.sendFile(path.join(__dirname,'../uploads/'+picture['name']));

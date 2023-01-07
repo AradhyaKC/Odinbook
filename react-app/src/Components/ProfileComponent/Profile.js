@@ -93,7 +93,7 @@ function Profile(props){
                             <TextField label='Description' defaultValue={loggedInUser.description==undefined?'Hello there , I am using Odinbook':loggedInUser.description}
                             name='description' id='description' variant='outlined'  style={{width:'95%'}} margin='dense' minRows='2'/>
                             <TextField label='' sx={{margin:'5px',width:'95%',}} name='profilePicUrl' id='profilePicUrl' type='file' 
-                            accept='image/jpeg, image/png, image/jpg' onChange={onChangeProfilePic}/>
+                            accept='image/png' onChange={onChangeProfilePic}/>
                             <Button sc={{color:'primary.main',margin:'5px'}}variant='contained' onClick={onFormSubmit}> Confirm Edit</Button>
                         </div>
                     </Box>
